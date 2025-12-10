@@ -86,8 +86,11 @@ function inverseNormalCDF(p) {
 }
 
 // Conversion functions - all go through Z-score as intermediate
-function toZScore(value, type) {
+function toZScore(value, type, mean, standardDeviation) {
     switch (type) {
+        case 'raw':
+            if (!standardDeviation || standardDeviation === 0) return null;
+            return (value - mean) / standardDeviation;
         case 'z':
             return value;
         case 't':
@@ -118,7 +121,9 @@ function fromZScore(z) {
 
 export default function ScoreConverter() {
     const [inputValue, setInputValue] = useState('');
-    const [scoreType, setScoreType] = useState('z');
+    const [scoreType, setScoreType] = useState('raw');
+    const [mean, setMean] = useState('100');
+    const [standardDeviation, setStandardDeviation] = useState('15');
 
     const convertedScores = useMemo(() => {
         const numValue = parseFloat(inputValue);
@@ -144,7 +149,7 @@ export default function ScoreConverter() {
             };
         }
 
-        const zScore = toZScore(numValue, scoreType);
+        const zScore = toZScore(numValue, scoreType, parseFloat(mean), parseFloat(standardDeviation));
         if (zScore === null || !isFinite(zScore)) {
             return {
                 z: null,
@@ -156,7 +161,7 @@ export default function ScoreConverter() {
         }
 
         return fromZScore(zScore);
-    }, [inputValue, scoreType]);
+    }, [inputValue, scoreType, mean, standardDeviation]);
 
     return (
         <div className="space-y-8">
@@ -165,6 +170,10 @@ export default function ScoreConverter() {
                 onChange={setInputValue}
                 scoreType={scoreType}
                 onScoreTypeChange={setScoreType}
+                meanValue={mean}
+                onMeanChange={setMean}
+                sdValue={standardDeviation}
+                onSdChange={setStandardDeviation}
             />
 
             <ClassificationBanner scores={convertedScores} />
