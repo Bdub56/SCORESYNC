@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import ScoreInput from './ScoreInput';
+import React, { useState, useMemo, useEffect } from 'react';
+import ScoreInput, { scoreTypes } from './ScoreInput';
 import ConversionResults from './ConversionResults';
 import ClassificationBanner from './ClassificationBanner';
 import { motion } from 'framer-motion';
@@ -87,6 +87,10 @@ function inverseNormalCDF(p) {
 
 // Conversion functions - all go through Z-score as intermediate
 function toZScore(value, type, mean, standardDeviation) {
+    // Check if it's a preset type (which uses raw score logic)
+    const selectedType = scoreTypes.find(t => t.value === type);
+    const isPreset = selectedType?.category === 'preset';
+    
     switch (type) {
         case 'raw':
             if (!standardDeviation || standardDeviation === 0) return null;
@@ -104,6 +108,11 @@ function toZScore(value, type, mean, standardDeviation) {
         case 'scaled':
             return (value - 10) / 3;
         default:
+            // Handle presets like raw scores
+            if (isPreset) {
+                if (!standardDeviation || standardDeviation === 0) return null;
+                return (value - mean) / standardDeviation;
+            }
             return null;
     }
 }
@@ -124,6 +133,15 @@ export default function ScoreConverter() {
     const [scoreType, setScoreType] = useState('raw');
     const [mean, setMean] = useState('100');
     const [standardDeviation, setStandardDeviation] = useState('15');
+
+    // Auto-populate mean and SD when a preset is selected
+    useEffect(() => {
+        const selectedType = scoreTypes.find(t => t.value === scoreType);
+        if (selectedType?.category === 'preset') {
+            setMean(selectedType.mean.toString());
+            setStandardDeviation(selectedType.sd.toString());
+        }
+    }, [scoreType]);
 
     const convertedScores = useMemo(() => {
         const numValue = parseFloat(inputValue);

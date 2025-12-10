@@ -11,12 +11,28 @@ import {
 import { motion } from 'framer-motion';
 
 const scoreTypes = [
-    { value: 'raw', label: 'Raw Score', hint: 'Enter score, mean, and SD' },
-    { value: 'z', label: 'Z-Score', hint: 'Mean=0, SD=1' },
-    { value: 't', label: 'T-Score', hint: 'Mean=50, SD=10' },
-    { value: 'percentile', label: 'Percentile Rank', hint: '1-99' },
-    { value: 'standard', label: 'Standard Score', hint: 'Mean=100, SD=15' },
-    { value: 'scaled', label: 'Scaled Score', hint: 'Mean=10, SD=3' },
+    { value: 'raw', label: 'Raw Score', hint: 'Enter score, mean, and SD', category: 'standard' },
+    { value: 'z', label: 'Z-Score', hint: 'Mean=0, SD=1', category: 'standard' },
+    { value: 't', label: 'T-Score', hint: 'Mean=50, SD=10', category: 'standard' },
+    { value: 'percentile', label: 'Percentile Rank', hint: '1-99', category: 'standard' },
+    { value: 'standard', label: 'Standard Score', hint: 'Mean=100, SD=15', category: 'standard' },
+    { value: 'scaled', label: 'Scaled Score', hint: 'Mean=10, SD=3', category: 'standard' },
+    
+    // IQ Test Presets
+    { value: 'wais', label: 'WAIS-IV/V (IQ)', hint: 'Mean=100, SD=15', category: 'preset', mean: 100, sd: 15 },
+    { value: 'wisc', label: 'WISC-V (IQ)', hint: 'Mean=100, SD=15', category: 'preset', mean: 100, sd: 15 },
+    { value: 'stanford-binet', label: 'Stanford-Binet 5 (IQ)', hint: 'Mean=100, SD=15', category: 'preset', mean: 100, sd: 15 },
+    { value: 'woodcock-johnson', label: 'Woodcock-Johnson IV', hint: 'Mean=100, SD=15', category: 'preset', mean: 100, sd: 15 },
+    
+    // Educational Assessment Presets
+    { value: 'sat', label: 'SAT (per section)', hint: 'Mean=500, SD=100', category: 'preset', mean: 500, sd: 100 },
+    { value: 'act', label: 'ACT Composite', hint: 'Mean=20.8, SD=5.8', category: 'preset', mean: 20.8, sd: 5.8 },
+    { value: 'gre', label: 'GRE (per section)', hint: 'Mean=150, SD=8.5', category: 'preset', mean: 150, sd: 8.5 },
+    { value: 'gmat', label: 'GMAT Total', hint: 'Mean=550, SD=100', category: 'preset', mean: 550, sd: 100 },
+    
+    // Subtest Presets
+    { value: 'wais-subtest', label: 'WAIS Subtest', hint: 'Mean=10, SD=3', category: 'preset', mean: 10, sd: 3 },
+    { value: 'wisc-subtest', label: 'WISC Subtest', hint: 'Mean=10, SD=3', category: 'preset', mean: 10, sd: 3 },
 ];
 
 const getScoreRange = (type) => {
@@ -27,9 +43,30 @@ const getScoreRange = (type) => {
         case 'percentile': return { min: 1, max: 99, step: 1 };
         case 'standard': return { min: 40, max: 160, step: 1 };
         case 'scaled': return { min: 1, max: 19, step: 1 };
-        default: return { min: 0, max: 100, step: 1 };
+        
+        // IQ Tests
+        case 'wais':
+        case 'wisc':
+        case 'stanford-binet':
+        case 'woodcock-johnson':
+            return { min: 40, max: 160, step: 1 };
+        
+        // Educational Tests
+        case 'sat': return { min: 200, max: 800, step: 10 };
+        case 'act': return { min: 1, max: 36, step: 1 };
+        case 'gre': return { min: 130, max: 170, step: 1 };
+        case 'gmat': return { min: 200, max: 800, step: 10 };
+        
+        // Subtests
+        case 'wais-subtest':
+        case 'wisc-subtest':
+            return { min: 1, max: 19, step: 1 };
+        
+        default: return { min: 0, max: 200, step: 1 };
     }
 };
+
+export { scoreTypes };
 
 export default function ScoreInput({ 
     value, 
@@ -75,8 +112,27 @@ export default function ScoreInput({
                             >
                                 <SelectValue placeholder="Select score type" />
                             </SelectTrigger>
-                            <SelectContent className="rounded-xl">
-                                {scoreTypes.map((type) => (
+                            <SelectContent className="rounded-xl max-h-[400px]">
+                                <div className="px-2 py-1.5 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                                    Standard Types
+                                </div>
+                                {scoreTypes.filter(t => t.category === 'standard').map((type) => (
+                                    <SelectItem 
+                                        key={type.value} 
+                                        value={type.value}
+                                        className="py-3 cursor-pointer"
+                                    >
+                                        <div className="flex flex-col items-start">
+                                            <span className="font-medium">{type.label}</span>
+                                            <span className="text-xs text-slate-400">{type.hint}</span>
+                                        </div>
+                                    </SelectItem>
+                                ))}
+                                
+                                <div className="px-2 py-1.5 mt-2 text-xs font-semibold text-indigo-600 uppercase tracking-wider border-t">
+                                    Test Presets
+                                </div>
+                                {scoreTypes.filter(t => t.category === 'preset').map((type) => (
                                     <SelectItem 
                                         key={type.value} 
                                         value={type.value}
@@ -120,7 +176,7 @@ export default function ScoreInput({
                     </div>
                 </div>
 
-                {scoreType === 'raw' && (
+                {(scoreType === 'raw' || scoreTypes.find(t => t.value === scoreType)?.category === 'preset') && (
                     <motion.div 
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
