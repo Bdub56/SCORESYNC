@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
+import { Button } from "@/components/ui/button";
 import {
     Select,
     SelectContent,
@@ -9,6 +10,8 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { motion } from 'framer-motion';
+import { Info } from 'lucide-react';
+import ScoreTypeInfoModal from './ScoreTypeInfoModal';
 
 const scoreTypes = [
     { value: 'raw', label: 'Raw Score', hint: 'Enter score, mean, and SD', category: 'standard' },
@@ -80,6 +83,7 @@ export default function ScoreInput({
 }) {
     const range = getScoreRange(scoreType);
     const numValue = parseFloat(value) || range.min;
+    const [showInfo, setShowInfo] = useState(false);
     return (
         <motion.div 
             initial={{ opacity: 0, y: -20 }}
@@ -99,12 +103,23 @@ export default function ScoreInput({
 
                 <div className="grid gap-6 md:grid-cols-2">
                     <div className="space-y-2">
-                        <Label 
-                            htmlFor="scoreType" 
-                            className="text-xs font-semibold uppercase tracking-wider text-slate-500"
-                        >
-                            Score Type
-                        </Label>
+                        <div className="flex items-center justify-between">
+                            <Label 
+                                htmlFor="scoreType" 
+                                className="text-xs font-semibold uppercase tracking-wider text-slate-500"
+                            >
+                                Score Type
+                            </Label>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setShowInfo(true)}
+                                className="h-6 px-2 text-xs text-slate-500 hover:text-indigo-600"
+                            >
+                                <Info className="w-3 h-3 mr-1" />
+                                Info
+                            </Button>
+                        </div>
                         <Select value={scoreType} onValueChange={onScoreTypeChange}>
                             <SelectTrigger 
                                 id="scoreType"
@@ -238,6 +253,12 @@ export default function ScoreInput({
                     </motion.div>
                 )}
             </div>
+
+            <ScoreTypeInfoModal 
+                scoreType={scoreType}
+                open={showInfo}
+                onOpenChange={setShowInfo}
+            />
         </motion.div>
     );
 }

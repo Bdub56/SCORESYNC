@@ -61,6 +61,7 @@ export default function ConversionResults({ scores, activeType }) {
                 {scoreConfigs.map((config, index) => (
                     <ScoreCard
                         key={config.key}
+                        scoreKey={config.key}
                         title={config.title}
                         value={scores[config.key]}
                         description={config.description}
