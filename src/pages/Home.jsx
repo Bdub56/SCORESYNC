@@ -30,11 +30,12 @@ export default function Home() {
                         </span>
                     </div>
                     
-                    <img 
-                        src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6939d2373c3b5efcd612d121/da05b3db1_Gemini_Generated_Image_3d4uqh3d4uqh3d4u.png" 
-                        alt="Score Sync"
-                        className="h-32 sm:h-40 mx-auto mb-4"
-                    />
+                    <h1 className="text-4xl sm:text-5xl font-bold text-slate-900 tracking-tight mb-4">
+                        Score{' '}
+                        <span className="bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-600 bg-clip-text text-transparent">
+                            Converter
+                        </span>
+                    </h1>
                     
                     <p className="text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
                         Instantly convert between Z-scores, T-scores, percentile ranks, 
