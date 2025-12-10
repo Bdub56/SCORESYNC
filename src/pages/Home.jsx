@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { ArrowRightLeft, Sparkles } from 'lucide-react';
 import ScoreConverter from '../components/converter/ScoreConverter';
 import InfoSection from '../components/converter/InfoSection';
+import ClassificationTable from '../components/converter/ClassificationTable';
 
 export default function Home() {
     return (
@@ -49,6 +50,9 @@ export default function Home() {
 
                 {/* Main Converter */}
                 <ScoreConverter />
+
+                {/* Classification Table */}
+                <ClassificationTable />
 
                 {/* Info Section */}
                 <InfoSection />

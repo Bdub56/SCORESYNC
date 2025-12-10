@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import ScoreInput from './ScoreInput';
 import ConversionResults from './ConversionResults';
+import ClassificationBanner from './ClassificationBanner';
 import { motion } from 'framer-motion';
 
 // Error function approximation for normal CDF
@@ -165,6 +166,8 @@ export default function ScoreConverter() {
                 scoreType={scoreType}
                 onScoreTypeChange={setScoreType}
             />
+
+            <ClassificationBanner scores={convertedScores} />
 
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
