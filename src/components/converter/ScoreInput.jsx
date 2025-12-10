@@ -1,6 +1,6 @@
 import React from 'react';
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
 import {
     Select,
     SelectContent,
@@ -19,6 +19,18 @@ const scoreTypes = [
     { value: 'scaled', label: 'Scaled Score', hint: 'Mean=10, SD=3' },
 ];
 
+const getScoreRange = (type) => {
+    switch (type) {
+        case 'raw': return { min: 0, max: 200, step: 1 };
+        case 'z': return { min: -4, max: 4, step: 0.1 };
+        case 't': return { min: 20, max: 80, step: 1 };
+        case 'percentile': return { min: 1, max: 99, step: 1 };
+        case 'standard': return { min: 40, max: 160, step: 1 };
+        case 'scaled': return { min: 1, max: 19, step: 1 };
+        default: return { min: 0, max: 100, step: 1 };
+    }
+};
+
 export default function ScoreInput({ 
     value, 
     onChange, 
@@ -29,6 +41,8 @@ export default function ScoreInput({
     sdValue,
     onSdChange
 }) {
+    const range = getScoreRange(scoreType);
+    const numValue = parseFloat(value) || range.min;
     return (
         <motion.div 
             initial={{ opacity: 0, y: -20 }}
@@ -78,22 +92,31 @@ export default function ScoreInput({
                         </Select>
                     </div>
 
-                    <div className="space-y-2">
-                        <Label 
-                            htmlFor="scoreValue" 
-                            className="text-xs font-semibold uppercase tracking-wider text-slate-500"
-                        >
-                            Score Value
-                        </Label>
-                        <Input
+                    <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                            <Label 
+                                htmlFor="scoreValue" 
+                                className="text-xs font-semibold uppercase tracking-wider text-slate-500"
+                            >
+                                Score Value
+                            </Label>
+                            <span className="text-2xl font-bold text-indigo-600">
+                                {value || range.min}
+                            </span>
+                        </div>
+                        <Slider
                             id="scoreValue"
-                            type="number"
-                            step="any"
-                            placeholder="Enter value..."
-                            value={value}
-                            onChange={(e) => onChange(e.target.value)}
-                            className="h-14 rounded-xl border-2 border-slate-200 bg-slate-50/50 text-2xl font-bold text-center focus:border-indigo-400 focus:ring-indigo-400/20 placeholder:text-slate-300 placeholder:font-normal placeholder:text-base"
+                            min={range.min}
+                            max={range.max}
+                            step={range.step}
+                            value={[numValue]}
+                            onValueChange={(vals) => onChange(vals[0].toString())}
+                            className="py-4"
                         />
+                        <div className="flex justify-between text-xs text-slate-400">
+                            <span>{range.min}</span>
+                            <span>{range.max}</span>
+                        </div>
                     </div>
                 </div>
 
@@ -104,39 +127,57 @@ export default function ScoreInput({
                         transition={{ duration: 0.3 }}
                         className="grid gap-6 md:grid-cols-2 mt-6 border-t pt-6 border-slate-100"
                     >
-                        <div className="space-y-2">
-                            <Label 
-                                htmlFor="meanValue" 
-                                className="text-xs font-semibold uppercase tracking-wider text-slate-500"
-                            >
-                                Population Mean
-                            </Label>
-                            <Input
+                        <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                                <Label 
+                                    htmlFor="meanValue" 
+                                    className="text-xs font-semibold uppercase tracking-wider text-slate-500"
+                                >
+                                    Population Mean
+                                </Label>
+                                <span className="text-lg font-bold text-slate-700">
+                                    {meanValue || 100}
+                                </span>
+                            </div>
+                            <Slider
                                 id="meanValue"
-                                type="number"
-                                step="any"
-                                placeholder="e.g. 100"
-                                value={meanValue}
-                                onChange={(e) => onMeanChange(e.target.value)}
-                                className="h-14 rounded-xl border-2 border-slate-200 bg-slate-50/50 text-base font-medium focus:border-indigo-400 focus:ring-indigo-400/20"
+                                min={0}
+                                max={200}
+                                step={1}
+                                value={[parseFloat(meanValue) || 100]}
+                                onValueChange={(vals) => onMeanChange(vals[0].toString())}
+                                className="py-4"
                             />
+                            <div className="flex justify-between text-xs text-slate-400">
+                                <span>0</span>
+                                <span>200</span>
+                            </div>
                         </div>
-                        <div className="space-y-2">
-                            <Label 
-                                htmlFor="sdValue" 
-                                className="text-xs font-semibold uppercase tracking-wider text-slate-500"
-                            >
-                                Population Standard Deviation
-                            </Label>
-                            <Input
+                        <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                                <Label 
+                                    htmlFor="sdValue" 
+                                    className="text-xs font-semibold uppercase tracking-wider text-slate-500"
+                                >
+                                    Population Standard Deviation
+                                </Label>
+                                <span className="text-lg font-bold text-slate-700">
+                                    {sdValue || 15}
+                                </span>
+                            </div>
+                            <Slider
                                 id="sdValue"
-                                type="number"
-                                step="any"
-                                placeholder="e.g. 15"
-                                value={sdValue}
-                                onChange={(e) => onSdChange(e.target.value)}
-                                className="h-14 rounded-xl border-2 border-slate-200 bg-slate-50/50 text-base font-medium focus:border-indigo-400 focus:ring-indigo-400/20"
+                                min={1}
+                                max={50}
+                                step={0.5}
+                                value={[parseFloat(sdValue) || 15]}
+                                onValueChange={(vals) => onSdChange(vals[0].toString())}
+                                className="py-4"
                             />
+                            <div className="flex justify-between text-xs text-slate-400">
+                                <span>1</span>
+                                <span>50</span>
+                            </div>
                         </div>
                     </motion.div>
                 )}
