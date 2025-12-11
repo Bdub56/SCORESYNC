@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRightLeft, Sparkles, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { createPageUrl } from './utils';
+import { createPageUrl } from '@/utils';
 import ScoreConverter from '../components/converter/ScoreConverter';
 
 export default function Home() {

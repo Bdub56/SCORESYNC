@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { createPageUrl } from './utils';
+import { createPageUrl } from '@/utils';
 import ClassificationTable from '../components/converter/ClassificationTable';
 import InfoSection from '../components/converter/InfoSection';
 
