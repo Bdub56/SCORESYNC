@@ -5,7 +5,26 @@ import { motion } from 'framer-motion';
 import { Trash2, History } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+
+function getClassificationLabel(standardScore, zScore, tScore, percentile) {
+    if (standardScore >= 130 || zScore >= 2.0 || tScore >= 70 || percentile >= 98) {
+        return { label: 'Very Superior', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' };
+    } else if (standardScore >= 120 || zScore >= 1.33 || tScore >= 63 || percentile >= 91) {
+        return { label: 'Superior', color: 'bg-blue-50 text-blue-700 border-blue-200' };
+    } else if (standardScore >= 110 || zScore >= 0.67 || tScore >= 57 || percentile >= 75) {
+        return { label: 'High Average', color: 'bg-indigo-50 text-indigo-700 border-indigo-200' };
+    } else if (standardScore >= 90 || zScore >= -0.67 || tScore >= 43 || percentile >= 25) {
+        return { label: 'Average', color: 'bg-slate-50 text-slate-700 border-slate-200' };
+    } else if (standardScore >= 80 || zScore >= -1.33 || tScore >= 37 || percentile >= 9) {
+        return { label: 'Low Average', color: 'bg-amber-50 text-amber-700 border-amber-200' };
+    } else if (standardScore >= 70 || zScore >= -2.0 || tScore >= 30 || percentile >= 3) {
+        return { label: 'Borderline', color: 'bg-orange-50 text-orange-700 border-orange-200' };
+    } else {
+        return { label: 'Extremely Low', color: 'bg-red-50 text-red-700 border-red-200' };
+    }
+}
 
 export default function SavedConversions() {
     const queryClient = useQueryClient();
@@ -59,32 +78,46 @@ export default function SavedConversions() {
                                 <TableHead>Percentile</TableHead>
                                 <TableHead>Standard</TableHead>
                                 <TableHead>Scaled</TableHead>
+                                <TableHead>Classification</TableHead>
                                 <TableHead className="w-[50px]"></TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {savedConversions.map((conversion) => (
-                                <TableRow key={conversion.id}>
-                                    <TableCell className="font-medium">{conversion.scale_name}</TableCell>
-                                    <TableCell className="text-slate-600">{conversion.score_type}</TableCell>
-                                    <TableCell>{conversion.input_value}</TableCell>
-                                    <TableCell>{conversion.z_score?.toFixed(2) || '—'}</TableCell>
-                                    <TableCell>{conversion.t_score?.toFixed(2) || '—'}</TableCell>
-                                    <TableCell>{conversion.percentile?.toFixed(2) || '—'}</TableCell>
-                                    <TableCell>{conversion.standard_score?.toFixed(2) || '—'}</TableCell>
-                                    <TableCell>{conversion.scaled_score?.toFixed(2) || '—'}</TableCell>
-                                    <TableCell>
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            onClick={() => deleteMutation.mutate(conversion.id)}
-                                            className="h-8 w-8 text-slate-400 hover:text-red-600"
-                                        >
-                                            <Trash2 className="w-4 h-4" />
-                                        </Button>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
+                            {savedConversions.map((conversion) => {
+                                const classification = getClassificationLabel(
+                                    conversion.standard_score,
+                                    conversion.z_score,
+                                    conversion.t_score,
+                                    conversion.percentile
+                                );
+                                return (
+                                    <TableRow key={conversion.id}>
+                                        <TableCell className="font-medium">{conversion.scale_name}</TableCell>
+                                        <TableCell className="text-slate-600">{conversion.score_type}</TableCell>
+                                        <TableCell>{conversion.input_value}</TableCell>
+                                        <TableCell>{conversion.z_score?.toFixed(2) || '—'}</TableCell>
+                                        <TableCell>{conversion.t_score?.toFixed(2) || '—'}</TableCell>
+                                        <TableCell>{conversion.percentile?.toFixed(2) || '—'}</TableCell>
+                                        <TableCell>{conversion.standard_score?.toFixed(2) || '—'}</TableCell>
+                                        <TableCell>{conversion.scaled_score?.toFixed(2) || '—'}</TableCell>
+                                        <TableCell>
+                                            <Badge className={`border ${classification.color}`}>
+                                                {classification.label}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() => deleteMutation.mutate(conversion.id)}
+                                                className="h-8 w-8 text-slate-400 hover:text-red-600"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                );
+                            })}
                         </TableBody>
                     </Table>
                 </div>
