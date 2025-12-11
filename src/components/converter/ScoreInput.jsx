@@ -274,6 +274,25 @@ export default function ScoreInput({
                         </div>
                     </motion.div>
                 )}
+
+                <div className="flex gap-3 mt-6 pt-6 border-t border-slate-100">
+                    <Button
+                        onClick={onReset}
+                        variant="outline"
+                        className="flex-1 h-12 rounded-xl"
+                    >
+                        <RotateCcw className="w-4 h-4 mr-2" />
+                        Reset Form
+                    </Button>
+                    <Button
+                        onClick={onSave}
+                        disabled={!canSave}
+                        className="flex-1 h-12 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50"
+                    >
+                        <Save className="w-4 h-4 mr-2" />
+                        Save Conversion
+                    </Button>
+                </div>
             </div>
 
             <ScoreTypeInfoModal 
