@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
     Select,
     SelectContent,
@@ -79,7 +80,9 @@ export default function ScoreInput({
     meanValue,
     onMeanChange,
     sdValue,
-    onSdChange
+    onSdChange,
+    scaleName,
+    onScaleNameChange
 }) {
     const range = getScoreRange(scoreType);
     const numValue = parseFloat(value) || range.min;
@@ -99,6 +102,22 @@ export default function ScoreInput({
                     <p className="text-sm text-slate-500">
                         Select the score type and enter the value to convert
                     </p>
+                </div>
+
+                <div className="space-y-2 mb-6">
+                    <Label 
+                        htmlFor="scaleName" 
+                        className="text-xs font-semibold uppercase tracking-wider text-slate-500"
+                    >
+                        Scale/Test Name
+                    </Label>
+                    <Input
+                        id="scaleName"
+                        placeholder="e.g., WAIS-IV Vocabulary, SAT Math"
+                        value={scaleName}
+                        onChange={(e) => onScaleNameChange(e.target.value)}
+                        className="h-12 rounded-xl border-2 border-slate-200 bg-slate-50/50 text-base focus:border-indigo-400 focus:ring-indigo-400/20"
+                    />
                 </div>
 
                 <div className="grid gap-6 md:grid-cols-2">

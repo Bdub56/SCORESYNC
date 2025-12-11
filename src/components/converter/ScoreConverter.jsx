@@ -1,8 +1,12 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { base44 } from '@/api/base44Client';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import ScoreInput, { scoreTypes } from './ScoreInput';
 import ConversionResults from './ConversionResults';
 import ClassificationBanner from './ClassificationBanner';
+import SavedConversions from './SavedConversions';
 import { motion } from 'framer-motion';
+import { toast } from 'sonner';
 
 // Error function approximation for normal CDF
 function erf(x) {
@@ -133,6 +137,17 @@ export default function ScoreConverter() {
     const [scoreType, setScoreType] = useState('raw');
     const [mean, setMean] = useState('100');
     const [standardDeviation, setStandardDeviation] = useState('15');
+    const [scaleName, setScaleName] = useState('');
+
+    const queryClient = useQueryClient();
+
+    const saveMutation = useMutation({
+        mutationFn: (data) => base44.entities.SavedConversion.create(data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['savedConversions'] });
+            toast.success('Conversion saved successfully!');
+        },
+    });
 
     // Auto-populate mean and SD when a preset is selected
     useEffect(() => {
@@ -179,9 +194,33 @@ export default function ScoreConverter() {
         }
 
         return fromZScore(zScore);
-    }, [inputValue, scoreType, mean, standardDeviation]);
+        }, [inputValue, scoreType, mean, standardDeviation]);
 
-    return (
+        const handleSave = () => {
+        if (!scaleName.trim()) {
+            toast.error('Please enter a scale/test name');
+            return;
+        }
+        if (!inputValue || convertedScores.z === null) {
+            toast.error('Please enter a valid score first');
+            return;
+        }
+
+        saveMutation.mutate({
+            scale_name: scaleName,
+            score_type: scoreType,
+            input_value: parseFloat(inputValue),
+            mean: parseFloat(mean),
+            standard_deviation: parseFloat(standardDeviation),
+            z_score: convertedScores.z,
+            t_score: convertedScores.t,
+            percentile: convertedScores.percentile,
+            standard_score: convertedScores.standard,
+            scaled_score: convertedScores.scaled,
+        });
+        };
+
+        return (
         <div className="space-y-8">
             <ScoreInput
                 value={inputValue}
@@ -192,6 +231,8 @@ export default function ScoreConverter() {
                 onMeanChange={setMean}
                 sdValue={standardDeviation}
                 onSdChange={setStandardDeviation}
+                scaleName={scaleName}
+                onScaleNameChange={setScaleName}
             />
 
             <ClassificationBanner scores={convertedScores} />
@@ -206,6 +247,15 @@ export default function ScoreConverter() {
                     activeType={scoreType}
                 />
             </motion.div>
-        </div>
-    );
-}
+
+            <SavedConversions 
+                currentConversion={{
+                    scaleName,
+                    inputValue,
+                    scores: convertedScores
+                }}
+                onSave={handleSave}
+            />
+            </div>
+            );
+            }
