@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { motion } from 'framer-motion';
-import { Trash2, History, Sparkles } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Trash2, History, Sparkles, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
+import NormalCurveChart from './NormalCurveChart';
 
 function getClassificationLabel(standardScore, zScore, tScore, percentile) {
     if (standardScore >= 130 || zScore >= 2.0 || tScore >= 70 || percentile >= 98) {
@@ -32,6 +33,7 @@ export default function SavedConversions() {
     const queryClient = useQueryClient();
     const [summary, setSummary] = useState('');
     const [isGenerating, setIsGenerating] = useState(false);
+    const [showChart, setShowChart] = useState(false);
 
     const { data: savedConversions = [], isLoading } = useQuery({
         queryKey: ['savedConversions'],
@@ -179,28 +181,58 @@ Write the narrative summary now:`,
             )}
 
             {savedConversions.length > 0 && (
-                <div className="mt-8 pt-8 border-t border-slate-200">
-                    <div className="flex items-center justify-between mb-4">
-                        <Label htmlFor="summary" className="text-sm font-semibold text-slate-700">
-                            Score Summary
-                        </Label>
+                <>
+                    <div className="mt-8 pt-8 border-t border-slate-200">
+                        <div className="flex items-center justify-between mb-4">
+                            <Label htmlFor="summary" className="text-sm font-semibold text-slate-700">
+                                Score Summary
+                            </Label>
+                            <Button
+                                onClick={generateSummary}
+                                disabled={isGenerating}
+                                className="bg-indigo-600 hover:bg-indigo-700"
+                            >
+                                <Sparkles className="w-4 h-4 mr-2" />
+                                {isGenerating ? 'Generating...' : 'Generate Summary'}
+                            </Button>
+                        </div>
+                        <Textarea
+                            id="summary"
+                            value={summary}
+                            onChange={(e) => setSummary(e.target.value)}
+                            placeholder="Click 'Generate Summary' to create an AI-powered narrative summary of your saved scores..."
+                            className="min-h-[200px] resize-y"
+                        />
+                    </div>
+
+                    <div className="mt-6 flex justify-center">
                         <Button
-                            onClick={generateSummary}
-                            disabled={isGenerating}
-                            className="bg-indigo-600 hover:bg-indigo-700"
+                            onClick={() => setShowChart(!showChart)}
+                            variant="outline"
+                            size="lg"
                         >
-                            <Sparkles className="w-4 h-4 mr-2" />
-                            {isGenerating ? 'Generating...' : 'Generate Summary'}
+                            <BarChart3 className="w-4 h-4 mr-2" />
+                            {showChart ? 'Hide' : 'Show'} Normal Distribution Plot
                         </Button>
                     </div>
-                    <Textarea
-                        id="summary"
-                        value={summary}
-                        onChange={(e) => setSummary(e.target.value)}
-                        placeholder="Click 'Generate Summary' to create an AI-powered narrative summary of your saved scores..."
-                        className="min-h-[200px] resize-y"
-                    />
-                </div>
+
+                    <AnimatePresence>
+                        {showChart && (
+                            <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                exit={{ opacity: 0, height: 0 }}
+                                transition={{ duration: 0.3 }}
+                                className="mt-6 p-6 bg-slate-50 rounded-2xl border border-slate-200"
+                            >
+                                <h4 className="text-lg font-semibold text-slate-800 mb-4">
+                                    Score Distribution on Normal Curve
+                                </h4>
+                                <NormalCurveChart conversions={savedConversions} />
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </>
             )}
         </motion.div>
     );
