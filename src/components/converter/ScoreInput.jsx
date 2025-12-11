@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
     Select,
     SelectContent,
@@ -10,7 +11,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { motion } from 'framer-motion';
-import { Info } from 'lucide-react';
+import { Info, Save, RotateCcw } from 'lucide-react';
 import ScoreTypeInfoModal from './ScoreTypeInfoModal';
 
 const scoreTypes = [
@@ -79,7 +80,12 @@ export default function ScoreInput({
     meanValue,
     onMeanChange,
     sdValue,
-    onSdChange
+    onSdChange,
+    scaleName,
+    onScaleNameChange,
+    onSave,
+    onReset,
+    canSave
 }) {
     const range = getScoreRange(scoreType);
     const numValue = parseFloat(value) || range.min;
@@ -99,6 +105,22 @@ export default function ScoreInput({
                     <p className="text-sm text-slate-500">
                         Select the score type and enter the value to convert
                     </p>
+                </div>
+
+                <div className="space-y-2 mb-6">
+                    <Label 
+                        htmlFor="scaleName" 
+                        className="text-xs font-semibold uppercase tracking-wider text-slate-500"
+                    >
+                        Scale/Test Name
+                    </Label>
+                    <Input
+                        id="scaleName"
+                        placeholder="e.g., WAIS-IV Vocabulary, SAT Math"
+                        value={scaleName}
+                        onChange={(e) => onScaleNameChange(e.target.value)}
+                        className="h-12 rounded-xl border-2 border-slate-200 bg-slate-50/50 text-base focus:border-indigo-400 focus:ring-indigo-400/20"
+                    />
                 </div>
 
                 <div className="grid gap-6 md:grid-cols-2">
@@ -252,6 +274,25 @@ export default function ScoreInput({
                         </div>
                     </motion.div>
                 )}
+
+                <div className="flex gap-3 mt-6 pt-6 border-t border-slate-100">
+                    <Button
+                        onClick={onReset}
+                        variant="outline"
+                        className="flex-1 h-12 rounded-xl"
+                    >
+                        <RotateCcw className="w-4 h-4 mr-2" />
+                        Reset Form
+                    </Button>
+                    <Button
+                        onClick={onSave}
+                        disabled={!canSave}
+                        className="flex-1 h-12 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50"
+                    >
+                        <Save className="w-4 h-4 mr-2" />
+                        Save Conversion
+                    </Button>
+                </div>
             </div>
 
             <ScoreTypeInfoModal 
