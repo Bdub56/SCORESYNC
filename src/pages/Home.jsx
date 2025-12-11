@@ -1,9 +1,10 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRightLeft, Sparkles } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { ArrowRightLeft, Sparkles, BookOpen } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { createPageUrl } from '@/utils';
 import ScoreConverter from '../components/converter/ScoreConverter';
-import InfoSection from '../components/converter/InfoSection';
-import ClassificationTable from '../components/converter/ClassificationTable';
 
 export default function Home() {
   return (
@@ -52,11 +53,20 @@ export default function Home() {
                 {/* Main Converter */}
                 <ScoreConverter />
 
-                {/* Classification Table */}
-                <ClassificationTable />
-
-                {/* Info Section */}
-                <InfoSection />
+                {/* Reference Link */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.3 }}
+                    className="text-center mt-8"
+                >
+                    <Link to={createPageUrl('Reference')}>
+                        <Button variant="outline" size="lg" className="rounded-xl h-12">
+                            <BookOpen className="w-5 h-5 mr-2" />
+                            View Score Reference Guide
+                        </Button>
+                    </Link>
+                </motion.div>
 
                 {/* Footer */}
                 <motion.footer
