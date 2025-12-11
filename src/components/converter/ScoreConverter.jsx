@@ -4,7 +4,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import ScoreInput, { scoreTypes } from './ScoreInput';
 import ConversionResults from './ConversionResults';
 import ClassificationBanner from './ClassificationBanner';
-import NormalCurveVisualization from './NormalCurveVisualization';
 import SavedConversions from './SavedConversions';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
@@ -250,8 +249,6 @@ export default function ScoreConverter() {
                 />
 
             <ClassificationBanner scores={convertedScores} />
-
-            <NormalCurveVisualization scores={convertedScores} />
 
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
