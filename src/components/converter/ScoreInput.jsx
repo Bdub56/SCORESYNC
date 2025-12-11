@@ -83,6 +83,14 @@ export default function ScoreInput({
     onSdChange,
     scaleName,
     onScaleNameChange,
+    name,
+    onNameChange,
+    ageYears,
+    onAgeYearsChange,
+    ageMonths,
+    onAgeMonthsChange,
+    imageFile,
+    onImageFileChange,
     onSave,
     onReset,
     canSave
@@ -107,6 +115,53 @@ export default function ScoreInput({
                     </p>
                 </div>
 
+                <div className="grid gap-6 md:grid-cols-2 mb-6">
+                    <div className="space-y-2">
+                        <Label 
+                            htmlFor="name" 
+                            className="text-xs font-semibold uppercase tracking-wider text-slate-500"
+                        >
+                            Name
+                        </Label>
+                        <Input
+                            id="name"
+                            placeholder="Enter name"
+                            value={name}
+                            onChange={(e) => onNameChange(e.target.value)}
+                            className="h-12 rounded-xl border-2 border-slate-200 bg-slate-50/50 text-base focus:border-indigo-400 focus:ring-indigo-400/20"
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <Label className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                            Age
+                        </Label>
+                        <div className="flex gap-3">
+                            <div className="flex-1">
+                                <Input
+                                    type="number"
+                                    placeholder="Years"
+                                    value={ageYears}
+                                    onChange={(e) => onAgeYearsChange(e.target.value)}
+                                    min="0"
+                                    max="120"
+                                    className="h-12 rounded-xl border-2 border-slate-200 bg-slate-50/50 text-base focus:border-indigo-400 focus:ring-indigo-400/20"
+                                />
+                            </div>
+                            <div className="flex-1">
+                                <Input
+                                    type="number"
+                                    placeholder="Months"
+                                    value={ageMonths}
+                                    onChange={(e) => onAgeMonthsChange(e.target.value)}
+                                    min="0"
+                                    max="11"
+                                    className="h-12 rounded-xl border-2 border-slate-200 bg-slate-50/50 text-base focus:border-indigo-400 focus:ring-indigo-400/20"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div className="space-y-2 mb-6">
                     <Label 
                         htmlFor="scaleName" 
@@ -120,6 +175,22 @@ export default function ScoreInput({
                         value={scaleName}
                         onChange={(e) => onScaleNameChange(e.target.value)}
                         className="h-12 rounded-xl border-2 border-slate-200 bg-slate-50/50 text-base focus:border-indigo-400 focus:ring-indigo-400/20"
+                    />
+                </div>
+
+                <div className="space-y-2 mb-6">
+                    <Label 
+                        htmlFor="imageUpload" 
+                        className="text-xs font-semibold uppercase tracking-wider text-slate-500"
+                    >
+                        Upload Image (Optional)
+                    </Label>
+                    <Input
+                        id="imageUpload"
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => onImageFileChange(e.target.files[0])}
+                        className="h-12 rounded-xl border-2 border-slate-200 bg-slate-50/50 text-base focus:border-indigo-400 focus:ring-indigo-400/20 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
                     />
                 </div>
 

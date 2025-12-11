@@ -138,6 +138,11 @@ export default function ScoreConverter() {
     const [mean, setMean] = useState('100');
     const [standardDeviation, setStandardDeviation] = useState('15');
     const [scaleName, setScaleName] = useState('');
+    const [name, setName] = useState('');
+    const [ageYears, setAgeYears] = useState('');
+    const [ageMonths, setAgeMonths] = useState('');
+    const [imageFile, setImageFile] = useState(null);
+    const [isUploading, setIsUploading] = useState(false);
 
     const queryClient = useQueryClient();
 
@@ -196,7 +201,7 @@ export default function ScoreConverter() {
         return fromZScore(zScore);
         }, [inputValue, scoreType, mean, standardDeviation]);
 
-        const handleSave = () => {
+        const handleSave = async () => {
         if (!scaleName.trim()) {
             toast.error('Please enter a scale/test name');
             return;
@@ -206,23 +211,45 @@ export default function ScoreConverter() {
             return;
         }
 
-        saveMutation.mutate({
-            scale_name: scaleName,
-            score_type: scoreType,
-            input_value: parseFloat(inputValue),
-            mean: parseFloat(mean),
-            standard_deviation: parseFloat(standardDeviation),
-            z_score: convertedScores.z,
-            t_score: convertedScores.t,
-            percentile: convertedScores.percentile,
-            standard_score: convertedScores.standard,
-            scaled_score: convertedScores.scaled,
-        });
+        setIsUploading(true);
+        try {
+            let imageUrl = null;
+            if (imageFile) {
+                const result = await base44.integrations.Core.UploadFile({ file: imageFile });
+                imageUrl = result.file_url;
+            }
+
+            saveMutation.mutate({
+                name: name.trim() || null,
+                age_years: ageYears ? parseFloat(ageYears) : null,
+                age_months: ageMonths ? parseFloat(ageMonths) : null,
+                image_url: imageUrl,
+                scale_name: scaleName,
+                score_type: scoreType,
+                input_value: parseFloat(inputValue),
+                mean: parseFloat(mean),
+                standard_deviation: parseFloat(standardDeviation),
+                z_score: convertedScores.z,
+                t_score: convertedScores.t,
+                percentile: convertedScores.percentile,
+                standard_score: convertedScores.standard,
+                scaled_score: convertedScores.scaled,
+            });
+        } catch (error) {
+            toast.error('Failed to save conversion');
+            console.error(error);
+        } finally {
+            setIsUploading(false);
+        }
         };
 
         const handleReset = () => {
         setInputValue('');
         setScaleName('');
+        setName('');
+        setAgeYears('');
+        setAgeMonths('');
+        setImageFile(null);
         setScoreType('raw');
         setMean('100');
         setStandardDeviation('15');
@@ -243,9 +270,17 @@ export default function ScoreConverter() {
                     onSdChange={setStandardDeviation}
                     scaleName={scaleName}
                     onScaleNameChange={setScaleName}
+                    name={name}
+                    onNameChange={setName}
+                    ageYears={ageYears}
+                    onAgeYearsChange={setAgeYears}
+                    ageMonths={ageMonths}
+                    onAgeMonthsChange={setAgeMonths}
+                    imageFile={imageFile}
+                    onImageFileChange={setImageFile}
                     onSave={handleSave}
                     onReset={handleReset}
-                    canSave={canSave}
+                    canSave={canSave && !isUploading}
                 />
 
             <ClassificationBanner scores={convertedScores} />

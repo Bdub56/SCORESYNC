@@ -118,6 +118,8 @@ Write the narrative summary now:`,
                     <Table>
                         <TableHeader>
                             <TableRow>
+                                <TableHead>Name</TableHead>
+                                <TableHead>Age</TableHead>
                                 <TableHead>Scale/Test</TableHead>
                                 <TableHead>Type</TableHead>
                                 <TableHead>Input</TableHead>
@@ -138,8 +140,13 @@ Write the narrative summary now:`,
                                     conversion.t_score,
                                     conversion.percentile
                                 );
+                                const ageDisplay = conversion.age_years 
+                                    ? `${conversion.age_years}y ${conversion.age_months || 0}m`
+                                    : '—';
                                 return (
                                     <TableRow key={conversion.id}>
+                                        <TableCell className="font-medium">{conversion.name || '—'}</TableCell>
+                                        <TableCell>{ageDisplay}</TableCell>
                                         <TableCell className="font-medium">{conversion.scale_name}</TableCell>
                                         <TableCell className="text-slate-600">{conversion.score_type}</TableCell>
                                         <TableCell>{conversion.input_value}</TableCell>
