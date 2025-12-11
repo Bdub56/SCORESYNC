@@ -220,20 +220,33 @@ export default function ScoreConverter() {
         });
         };
 
+        const handleReset = () => {
+        setInputValue('');
+        setScaleName('');
+        setScoreType('raw');
+        setMean('100');
+        setStandardDeviation('15');
+        };
+
+        const canSave = scaleName.trim() && inputValue && convertedScores.z !== null;
+
         return (
         <div className="space-y-8">
-            <ScoreInput
-                value={inputValue}
-                onChange={setInputValue}
-                scoreType={scoreType}
-                onScoreTypeChange={setScoreType}
-                meanValue={mean}
-                onMeanChange={setMean}
-                sdValue={standardDeviation}
-                onSdChange={setStandardDeviation}
-                scaleName={scaleName}
-                onScaleNameChange={setScaleName}
-            />
+                <ScoreInput
+                    value={inputValue}
+                    onChange={setInputValue}
+                    scoreType={scoreType}
+                    onScoreTypeChange={setScoreType}
+                    meanValue={mean}
+                    onMeanChange={setMean}
+                    sdValue={standardDeviation}
+                    onSdChange={setStandardDeviation}
+                    scaleName={scaleName}
+                    onScaleNameChange={setScaleName}
+                    onSave={handleSave}
+                    onReset={handleReset}
+                    canSave={canSave}
+                />
 
             <ClassificationBanner scores={convertedScores} />
 
@@ -248,14 +261,7 @@ export default function ScoreConverter() {
                 />
             </motion.div>
 
-            <SavedConversions 
-                currentConversion={{
-                    scaleName,
-                    inputValue,
-                    scores: convertedScores
-                }}
-                onSave={handleSave}
-            />
+            <SavedConversions />
             </div>
             );
             }

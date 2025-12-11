@@ -2,12 +2,12 @@ import React from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { Save, Trash2, History } from 'lucide-react';
+import { Trash2, History } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { toast } from 'sonner';
 
-export default function SavedConversions({ currentConversion, onSave }) {
+export default function SavedConversions() {
     const queryClient = useQueryClient();
 
     const { data: savedConversions = [], isLoading } = useQuery({
@@ -23,10 +23,6 @@ export default function SavedConversions({ currentConversion, onSave }) {
         },
     });
 
-    const canSave = currentConversion.scaleName && 
-                    currentConversion.inputValue && 
-                    currentConversion.scores.z !== null;
-
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -34,24 +30,14 @@ export default function SavedConversions({ currentConversion, onSave }) {
             transition={{ duration: 0.5, delay: 0.4 }}
             className="bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 p-8 mt-8"
         >
-            <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-xl bg-indigo-100">
-                        <History className="w-5 h-5 text-indigo-600" />
-                    </div>
-                    <div>
-                        <h3 className="font-semibold text-slate-800">Saved Conversions</h3>
-                        <p className="text-sm text-slate-500">Your conversion history</p>
-                    </div>
+            <div className="flex items-center gap-3 mb-6">
+                <div className="p-2 rounded-xl bg-indigo-100">
+                    <History className="w-5 h-5 text-indigo-600" />
                 </div>
-                <Button
-                    onClick={onSave}
-                    disabled={!canSave}
-                    className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50"
-                >
-                    <Save className="w-4 h-4 mr-2" />
-                    Save Current
-                </Button>
+                <div>
+                    <h3 className="font-semibold text-slate-800">Saved Conversions</h3>
+                    <p className="text-sm text-slate-500">Your conversion history</p>
+                </div>
             </div>
 
             {isLoading ? (

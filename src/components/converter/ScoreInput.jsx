@@ -11,7 +11,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { motion } from 'framer-motion';
-import { Info } from 'lucide-react';
+import { Info, Save, RotateCcw } from 'lucide-react';
 import ScoreTypeInfoModal from './ScoreTypeInfoModal';
 
 const scoreTypes = [
@@ -82,7 +82,10 @@ export default function ScoreInput({
     sdValue,
     onSdChange,
     scaleName,
-    onScaleNameChange
+    onScaleNameChange,
+    onSave,
+    onReset,
+    canSave
 }) {
     const range = getScoreRange(scoreType);
     const numValue = parseFloat(value) || range.min;
