@@ -40,8 +40,7 @@ export default function NormalCurveChart({ conversions }) {
                     />
                     <YAxis 
                         domain={[0, 0.45]}
-                        label={{ value: 'Probability Density', angle: -90, position: 'insideLeft' }}
-                        stroke="#64748b"
+                        hide
                     />
                     <Tooltip 
                         content={({ active, payload }) => {
