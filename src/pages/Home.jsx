@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowRightLeft, Sparkles, BookOpen } from 'lucide-react';
+import { ArrowRightLeft, Sparkles, BookOpen, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { createPageUrl } from '@/utils';
 import ScoreConverter from '../components/converter/ScoreConverter';
@@ -53,17 +53,23 @@ export default function Home() {
                 {/* Main Converter */}
                 <ScoreConverter />
 
-                {/* Reference Guide Link */}
+                {/* Navigation Links */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.2 }}
-                    className="mt-8 text-center"
+                    className="mt-8 flex justify-center gap-4 flex-wrap"
                 >
                     <Link to={createPageUrl('Reference')}>
                         <Button variant="outline" size="lg" className="rounded-full">
                             <BookOpen className="w-4 h-4 mr-2" />
-                            View Score Reference Guide
+                            Score Reference Guide
+                        </Button>
+                    </Link>
+                    <Link to={createPageUrl('TestSubjects')}>
+                        <Button variant="outline" size="lg" className="rounded-full">
+                            <Users className="w-4 h-4 mr-2" />
+                            Manage Test Subjects
                         </Button>
                     </Link>
                 </motion.div>
