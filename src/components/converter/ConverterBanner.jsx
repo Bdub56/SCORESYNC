@@ -47,11 +47,7 @@ export default function ConverterBanner() {
                         transition={{ delay: 0.2, duration: 0.5 }}
                         className="mb-6"
                     >
-                        <img 
-                            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6939d2373c3b5efcd612d121/b6b38e6b9_Gemini_Generated_Image_3d4uqh3d4uqh3d4u1-fotor-20251210154843.png"
-                            alt="Score Sync Logo"
-                            className="h-32 sm:h-40 w-auto object-contain drop-shadow-2xl"
-                        />
+                       
                     </motion.div>
 
                     <motion.div
