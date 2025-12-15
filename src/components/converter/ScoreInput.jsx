@@ -26,7 +26,7 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover";
 import { motion } from 'framer-motion';
-import { Info, Save, RotateCcw, Check, ChevronsUpDown } from 'lucide-react';
+import { Info, Save, RotateCcw, Check, ChevronsUpDown, FileText } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import ScoreTypeInfoModal from './ScoreTypeInfoModal';
 
@@ -107,7 +107,9 @@ export default function ScoreInput({
     onAgeMonthsChange,
     onSave,
     onReset,
-    canSave
+    canSave,
+    onSaveReport,
+    scores
 }) {
     const range = getScoreRange(scoreType);
     const numValue = parseFloat(value) || range.min;
@@ -428,10 +430,19 @@ export default function ScoreInput({
                     <Button
                         onClick={onReset}
                         variant="outline"
-                        className="flex-1 h-12 rounded-xl"
+                        className="h-12 rounded-xl"
                     >
                         <RotateCcw className="w-4 h-4 mr-2" />
-                        Reset Form
+                        Reset
+                    </Button>
+                    <Button
+                        onClick={onSaveReport}
+                        disabled={!canSave}
+                        variant="outline"
+                        className="flex-1 h-12 rounded-xl"
+                    >
+                        <FileText className="w-4 h-4 mr-2" />
+                        Save Report
                     </Button>
                     <Button
                         onClick={onSave}
