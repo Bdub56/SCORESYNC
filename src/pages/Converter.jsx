@@ -5,7 +5,6 @@ import { BookOpen, Users, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { createPageUrl } from '@/utils';
 import ScoreConverter from '../components/converter/ScoreConverter';
-import ConverterBanner from '../components/converter/ConverterBanner';
 
 export default function Converter() {
   return (
@@ -26,8 +25,17 @@ export default function Converter() {
                     </Button>
                 </Link>
 
-                {/* Banner */}
-                <ConverterBanner />
+                {/* Page Header */}
+                <motion.div
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                    className="mb-8"
+                >
+                    <h1 className="text-4xl font-bold text-slate-900 text-center">
+                        Test Score Converter
+                    </h1>
+                </motion.div>
 
                 {/* Main Converter */}
                 <ScoreConverter />
