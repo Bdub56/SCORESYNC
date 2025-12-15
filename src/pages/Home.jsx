@@ -45,7 +45,7 @@ export default function Home() {
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/30">
             {/* Decorative Elements */}
             <div className="fixed inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute -top-40 -right-40 w-80 h-80 bg-indigo-200/20 rounded-full blur-3xl" />
+                <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-200/20 rounded-full blur-3xl" />
                 <div className="absolute top-1/2 -left-20 w-60 h-60 bg-violet-200/20 rounded-full blur-3xl" />
                 <div className="absolute bottom-20 right-1/3 w-40 h-40 bg-teal-200/20 rounded-full blur-3xl" />
             </div>
@@ -69,7 +69,7 @@ export default function Home() {
 
                         <h1 className="text-4xl sm:text-6xl font-bold text-slate-900 mb-6 leading-tight">
                             Transform Psychometric Scores
-                            <span className="block text-indigo-600">Instantly & Accurately</span>
+                            <span className="block text-blue-600">Instantly & Accurately</span>
                         </h1>
 
                         <p className="text-xl text-slate-600 mb-8 max-w-3xl mx-auto leading-relaxed">
@@ -79,7 +79,7 @@ export default function Home() {
 
                         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                             <Link to={createPageUrl('Converter')}>
-                                <Button size="lg" className="text-lg px-8 py-6 rounded-full bg-indigo-600 hover:bg-indigo-700">
+                                <Button size="lg" className="text-lg px-8 py-6 rounded-full bg-blue-600 hover:bg-blue-700">
                                     Get Started Free
                                     <ArrowRight className="w-5 h-5 ml-2" />
                                 </Button>
@@ -115,9 +115,9 @@ export default function Home() {
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.5, delay: 0.3 + index * 0.1 }}
                                 >
-                                    <Card className="p-6 h-full hover:shadow-xl transition-all border-2 hover:border-indigo-200">
-                                        <div className="w-12 h-12 rounded-xl bg-indigo-100 flex items-center justify-center mb-4">
-                                            <feature.icon className="w-6 h-6 text-indigo-600" />
+                                    <Card className="p-6 h-full hover:shadow-xl transition-all border-2 hover:border-blue-200">
+                                        <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center mb-4">
+                                            <feature.icon className="w-6 h-6 text-blue-600" />
                                         </div>
                                         <h3 className="text-xl font-semibold text-slate-800 mb-2">
                                             {feature.title}
@@ -170,12 +170,12 @@ export default function Home() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6, delay: 0.6 }}
-                        className="bg-gradient-to-r from-indigo-600 to-violet-600 rounded-3xl shadow-2xl p-8 sm:p-12 text-center text-white"
+                        className="bg-gradient-to-r from-blue-600 to-violet-600 rounded-3xl shadow-2xl p-8 sm:p-12 text-center text-white"
                     >
                         <h2 className="text-3xl sm:text-4xl font-bold mb-4">
                             Ready to Streamline Your Assessment Workflow?
                         </h2>
-                        <p className="text-xl text-indigo-100 mb-8 max-w-2xl mx-auto">
+                        <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
                             Join professionals who trust Score Sync for accurate, efficient psychometric conversions.
                         </p>
                         <Link to={createPageUrl('Converter')}>
