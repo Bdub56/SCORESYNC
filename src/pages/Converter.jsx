@@ -46,11 +46,6 @@ export default function Converter() {
                             className="h-32 sm:h-40 w-auto object-contain"
                         />
                     </div>
-                    
-                    <p className="text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
-                        Instantly convert between Z-scores, T-scores, percentile ranks, 
-                        standard scores, and scaled scores.
-                    </p>
 
                     <div className="flex items-center justify-center gap-2 mt-6 text-sm text-slate-500">
                         <ArrowRightLeft className="w-4 h-4" />
