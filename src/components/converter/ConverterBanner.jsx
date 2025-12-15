@@ -67,7 +67,7 @@ export default function ConverterBanner() {
             className="flex items-center gap-2 text-white/90 text-sm">
             
                         <TrendingUp className="w-4 h-4" />
-                        <span>Convert between Z-scores, T-scores, Percentiles & More</span>
+                        <span className="2x">Convert between Z-scores, T-scores, Percentiles & More</span>
                     </motion.div>
                 </div>
             </div>
