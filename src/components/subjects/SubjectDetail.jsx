@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Printer, Edit2, Save, X, Trash2, BarChart3 } from 'lucide-react';
+import { ArrowLeft, Printer, Edit2, Save, X, Trash2, BarChart3, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -10,6 +10,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { toast } from 'sonner';
 import NormalCurveChart from '../converter/NormalCurveChart';
 import moment from 'moment';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 function getClassificationLabel(standardScore, zScore, tScore, percentile) {
     if (standardScore >= 130 || zScore >= 2.0 || tScore >= 70 || percentile >= 98) {
@@ -34,7 +36,10 @@ export default function SubjectDetail({ subject, onBack }) {
     const [editedName, setEditedName] = useState(subject.name);
     const [editedAge, setEditedAge] = useState({ years: subject.age_years || '', months: subject.age_months || '' });
     const [showChart, setShowChart] = useState(false);
+    const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
     
+    const reportRef = useRef(null);
+    const chartRef = useRef(null);
     const queryClient = useQueryClient();
 
     const updateMutation = useMutation({
@@ -75,6 +80,170 @@ export default function SubjectDetail({ subject, onBack }) {
 
     const handlePrint = () => {
         window.print();
+    };
+
+    const generatePDF = async () => {
+        setIsGeneratingPDF(true);
+        toast.loading('Generating PDF report...');
+
+        try {
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const pageWidth = pdf.internal.pageSize.getWidth();
+            const pageHeight = pdf.internal.pageSize.getHeight();
+            const margin = 15;
+            let yPosition = margin;
+
+            // Header
+            pdf.setFontSize(20);
+            pdf.setFont('helvetica', 'bold');
+            pdf.text('Psychometric Assessment Report', margin, yPosition);
+            yPosition += 10;
+
+            // Subject Info
+            pdf.setFontSize(12);
+            pdf.setFont('helvetica', 'normal');
+            pdf.text(`Subject: ${subject.name}`, margin, yPosition);
+            yPosition += 7;
+            if (subject.age_years || subject.age_months) {
+                pdf.text(`Age: ${subject.age_years || 0} years ${subject.age_months || 0} months`, margin, yPosition);
+                yPosition += 7;
+            }
+            pdf.text(`Report Date: ${moment().format('MMMM D, YYYY')}`, margin, yPosition);
+            yPosition += 7;
+            pdf.text(`Number of Tests: ${subject.conversions.length}`, margin, yPosition);
+            yPosition += 12;
+
+            // Score Summary Section
+            pdf.setFontSize(14);
+            pdf.setFont('helvetica', 'bold');
+            pdf.text('Score Summary', margin, yPosition);
+            yPosition += 8;
+
+            // Table headers
+            pdf.setFontSize(9);
+            pdf.setFont('helvetica', 'bold');
+            const colWidths = [35, 20, 15, 15, 15, 15, 15, 15, 30];
+            const headers = ['Test/Scale', 'Type', 'Input', 'Z', 'T', '%ile', 'Std', 'Scl', 'Classification'];
+            let xPosition = margin;
+            
+            headers.forEach((header, i) => {
+                pdf.text(header, xPosition, yPosition);
+                xPosition += colWidths[i];
+            });
+            yPosition += 5;
+
+            // Table data
+            pdf.setFont('helvetica', 'normal');
+            pdf.setFontSize(8);
+            
+            subject.conversions.forEach((conversion, index) => {
+                if (yPosition > pageHeight - 30) {
+                    pdf.addPage();
+                    yPosition = margin;
+                }
+
+                const classification = getClassificationLabel(
+                    conversion.standard_score,
+                    conversion.z_score,
+                    conversion.t_score,
+                    conversion.percentile
+                );
+
+                xPosition = margin;
+                const rowData = [
+                    conversion.scale_name.substring(0, 25),
+                    conversion.score_type.substring(0, 8),
+                    conversion.input_value.toString(),
+                    conversion.z_score?.toFixed(2) || '—',
+                    conversion.t_score?.toFixed(2) || '—',
+                    conversion.percentile?.toFixed(1) || '—',
+                    conversion.standard_score?.toFixed(0) || '—',
+                    conversion.scaled_score?.toFixed(1) || '—',
+                    classification.label
+                ];
+
+                rowData.forEach((data, i) => {
+                    pdf.text(data, xPosition, yPosition);
+                    xPosition += colWidths[i];
+                });
+                yPosition += 5;
+            });
+
+            yPosition += 10;
+
+            // Summary Statistics
+            if (yPosition > pageHeight - 50) {
+                pdf.addPage();
+                yPosition = margin;
+            }
+
+            pdf.setFontSize(14);
+            pdf.setFont('helvetica', 'bold');
+            pdf.text('Statistical Overview', margin, yPosition);
+            yPosition += 8;
+
+            pdf.setFontSize(10);
+            pdf.setFont('helvetica', 'normal');
+            
+            const avgStandard = subject.conversions.reduce((sum, c) => sum + (c.standard_score || 0), 0) / subject.conversions.length;
+            const avgPercentile = subject.conversions.reduce((sum, c) => sum + (c.percentile || 0), 0) / subject.conversions.length;
+            
+            pdf.text(`Average Standard Score: ${avgStandard.toFixed(1)}`, margin, yPosition);
+            yPosition += 6;
+            pdf.text(`Average Percentile: ${avgPercentile.toFixed(1)}`, margin, yPosition);
+            yPosition += 6;
+
+            const classifications = subject.conversions.map(c => 
+                getClassificationLabel(c.standard_score, c.z_score, c.t_score, c.percentile).label
+            );
+            const uniqueClassifications = [...new Set(classifications)];
+            pdf.text(`Performance Range: ${uniqueClassifications.join(', ')}`, margin, yPosition);
+            yPosition += 12;
+
+            // Add normal curve chart
+            if (chartRef.current) {
+                pdf.setFontSize(14);
+                pdf.setFont('helvetica', 'bold');
+                pdf.text('Score Distribution', margin, yPosition);
+                yPosition += 8;
+
+                const canvas = await html2canvas(chartRef.current, {
+                    scale: 2,
+                    backgroundColor: '#ffffff',
+                    logging: false
+                });
+                
+                const imgData = canvas.toDataURL('image/png');
+                const imgWidth = pageWidth - (margin * 2);
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                
+                if (yPosition + imgHeight > pageHeight - margin) {
+                    pdf.addPage();
+                    yPosition = margin;
+                }
+                
+                pdf.addImage(imgData, 'PNG', margin, yPosition, imgWidth, imgHeight);
+                yPosition += imgHeight + 10;
+            }
+
+            // Footer on last page
+            pdf.setFontSize(8);
+            pdf.setFont('helvetica', 'italic');
+            const footerY = pageHeight - 10;
+            pdf.text('Generated by Score Sync - Psychometric Assessment Tool', margin, footerY);
+
+            // Save PDF
+            pdf.save(`${subject.name.replace(/\s+/g, '_')}_Assessment_Report_${moment().format('YYYY-MM-DD')}.pdf`);
+            
+            toast.dismiss();
+            toast.success('PDF report generated successfully!');
+        } catch (error) {
+            toast.dismiss();
+            toast.error('Failed to generate PDF report');
+            console.error(error);
+        } finally {
+            setIsGeneratingPDF(false);
+        }
     };
 
     return (
@@ -159,6 +328,10 @@ export default function SubjectDetail({ subject, onBack }) {
                                         <Button onClick={() => setIsEditing(true)} variant="outline" size="sm">
                                             <Edit2 className="w-4 h-4 mr-2" />
                                             Edit
+                                        </Button>
+                                        <Button onClick={generatePDF} variant="default" size="sm" disabled={isGeneratingPDF}>
+                                            <Download className="w-4 h-4 mr-2" />
+                                            {isGeneratingPDF ? 'Generating...' : 'Download PDF'}
                                         </Button>
                                         <Button onClick={handlePrint} variant="outline" size="sm">
                                             <Printer className="w-4 h-4 mr-2" />
@@ -248,6 +421,7 @@ export default function SubjectDetail({ subject, onBack }) {
 
                         {showChart && (
                             <motion.div
+                                ref={chartRef}
                                 initial={{ opacity: 0, height: 0 }}
                                 animate={{ opacity: 1, height: 'auto' }}
                                 transition={{ duration: 0.3 }}
