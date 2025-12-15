@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { Activity } from 'lucide-react';
 
 export default function ConverterBanner() {
   return (
@@ -38,7 +39,14 @@ export default function ConverterBanner() {
 
       {/* Content */}
       <div className="relative z-10 px-8 py-8 sm:px-12 sm:py-10">
-        <div className="flex items-center justify-center">
+        <div className="flex items-center justify-center gap-4">
+          <motion.div
+            initial={{ scale: 0.5, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.1, duration: 0.5 }}
+            className="p-3 rounded-xl bg-white/20 backdrop-blur-sm">
+            <Activity className="w-8 h-8 text-white" />
+          </motion.div>
           <motion.h1
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
