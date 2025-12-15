@@ -1,10 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowRightLeft, Sparkles, BookOpen, Users, ArrowLeft, Home } from 'lucide-react';
+import { BookOpen, Users, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { createPageUrl } from '@/utils';
 import ScoreConverter from '../components/converter/ScoreConverter';
+import ConverterBanner from '../components/converter/ConverterBanner';
 
 export default function Converter() {
   return (
@@ -25,33 +26,8 @@ export default function Converter() {
                     </Button>
                 </Link>
 
-                {/* Header */}
-                <motion.header
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-12">
-
-                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-50 border border-indigo-100 mb-6">
-                        <Sparkles className="w-4 h-4 text-indigo-500" />
-                        <span className="text-sm font-medium text-indigo-700">Psychometric Scoring Tool
-
-            </span>
-                    </div>
-                    
-                    <div className="flex justify-center mb-4">
-                        <img 
-                            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6939d2373c3b5efcd612d121/b6b38e6b9_Gemini_Generated_Image_3d4uqh3d4uqh3d4u1-fotor-20251210154843.png"
-                            alt="Score Sync Logo"
-                            className="h-32 sm:h-40 w-auto object-contain"
-                        />
-                    </div>
-
-                    <div className="flex items-center justify-center gap-2 mt-6 text-sm text-slate-500">
-                        <ArrowRightLeft className="w-4 h-4" />
-                        <span>All conversions are bidirectional and based on normal distribution</span>
-                    </div>
-                </motion.header>
+                {/* Banner */}
+                <ConverterBanner />
 
                 {/* Main Converter */}
                 <ScoreConverter />
