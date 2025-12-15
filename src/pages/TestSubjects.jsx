@@ -62,7 +62,7 @@ export default function TestSubjects() {
                     animate={{ opacity: 1, y: 0 }}
                     className="mb-8"
                 >
-                    <Link to={createPageUrl('Home')}>
+                    <Link to={createPageUrl('Converter')}>
                         <Button variant="ghost" size="sm" className="mb-4">
                             <ArrowLeft className="w-4 h-4 mr-2" />
                             Back to Converter

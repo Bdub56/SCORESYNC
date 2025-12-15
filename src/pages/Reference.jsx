@@ -21,7 +21,7 @@ export default function Reference() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5 }}
                 >
-                    <Link to={createPageUrl('Home')}>
+                    <Link to={createPageUrl('Converter')}>
                         <Button variant="ghost" className="mb-6">
                             <ArrowLeft className="w-4 h-4 mr-2" />
                             Back to Converter
