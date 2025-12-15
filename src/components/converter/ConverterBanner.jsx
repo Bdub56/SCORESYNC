@@ -61,9 +61,7 @@ export default function ConverterBanner() {
                         className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 mb-4"
                     >
                         <Sparkles className="w-4 h-4 text-white" />
-                        <span className="text-sm font-semibold text-white">
-                            Professional Psychometric Scoring Tool
-                        </span>
+                       
                     </motion.div>
 
                     <motion.div
