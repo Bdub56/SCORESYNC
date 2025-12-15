@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowRightLeft, Sparkles, BookOpen, Users } from 'lucide-react';
+import { ArrowRightLeft, Sparkles, BookOpen, Users, ArrowLeft, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { createPageUrl } from '@/utils';
 import ScoreConverter from '../components/converter/ScoreConverter';
@@ -17,6 +17,14 @@ export default function Converter() {
             </div>
 
             <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+                {/* Back to Home */}
+                <Link to={createPageUrl('Home')}>
+                    <Button variant="ghost" className="mb-4">
+                        <ArrowLeft className="w-4 h-4 mr-2" />
+                        Back to Home
+                    </Button>
+                </Link>
+
                 {/* Header */}
                 <motion.header
           initial={{ opacity: 0, y: -20 }}
