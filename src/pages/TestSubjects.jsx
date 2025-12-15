@@ -2,14 +2,13 @@ import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, ArrowLeft, Search, Plus } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Users, Search, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { createPageUrl } from '@/utils';
 import SubjectCard from '../components/subjects/SubjectCard';
 import SubjectDetail from '../components/subjects/SubjectDetail';
 import SubjectCreateForm from '../components/subjects/SubjectCreateForm';
+import Navigation from '../components/Navigation';
 import { toast } from 'sonner';
 
 export default function TestSubjects() {
@@ -93,6 +92,8 @@ export default function TestSubjects() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/30">
+            <Navigation />
+            
             <div className="fixed inset-0 overflow-hidden pointer-events-none">
                 <div className="absolute -top-40 -right-40 w-80 h-80 bg-indigo-200/20 rounded-full blur-3xl" />
                 <div className="absolute top-1/3 -left-20 w-60 h-60 bg-violet-200/20 rounded-full blur-3xl" />
@@ -104,12 +105,6 @@ export default function TestSubjects() {
                     animate={{ opacity: 1, y: 0 }}
                     className="mb-8"
                 >
-                    <Link to={createPageUrl('Converter')}>
-                        <Button variant="ghost" size="sm" className="mb-4">
-                            <ArrowLeft className="w-4 h-4 mr-2" />
-                            Back to Converter
-                        </Button>
-                    </Link>
 
                     <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center gap-3">
