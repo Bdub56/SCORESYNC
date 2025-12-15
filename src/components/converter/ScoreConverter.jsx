@@ -141,8 +141,6 @@ export default function ScoreConverter() {
     const [name, setName] = useState('');
     const [ageYears, setAgeYears] = useState('');
     const [ageMonths, setAgeMonths] = useState('');
-    const [imageFile, setImageFile] = useState(null);
-    const [isUploading, setIsUploading] = useState(false);
 
     const queryClient = useQueryClient();
 
@@ -202,28 +200,19 @@ export default function ScoreConverter() {
         }, [inputValue, scoreType, mean, standardDeviation]);
 
         const handleSave = async () => {
-        if (!scaleName.trim()) {
-            toast.error('Please enter a scale/test name');
-            return;
-        }
-        if (!inputValue || convertedScores.z === null) {
-            toast.error('Please enter a valid score first');
-            return;
-        }
-
-        setIsUploading(true);
-        try {
-            let imageUrl = null;
-            if (imageFile) {
-                const result = await base44.integrations.Core.UploadFile({ file: imageFile });
-                imageUrl = result.file_url;
+            if (!scaleName.trim()) {
+                toast.error('Please enter a scale/test name');
+                return;
+            }
+            if (!inputValue || convertedScores.z === null) {
+                toast.error('Please enter a valid score first');
+                return;
             }
 
             saveMutation.mutate({
                 name: name.trim() || null,
                 age_years: ageYears ? parseFloat(ageYears) : null,
                 age_months: ageMonths ? parseFloat(ageMonths) : null,
-                image_url: imageUrl,
                 scale_name: scaleName,
                 score_type: scoreType,
                 input_value: parseFloat(inputValue),
@@ -235,24 +224,17 @@ export default function ScoreConverter() {
                 standard_score: convertedScores.standard,
                 scaled_score: convertedScores.scaled,
             });
-        } catch (error) {
-            toast.error('Failed to save conversion');
-            console.error(error);
-        } finally {
-            setIsUploading(false);
-        }
         };
 
         const handleReset = () => {
-        setInputValue('');
-        setScaleName('');
-        setName('');
-        setAgeYears('');
-        setAgeMonths('');
-        setImageFile(null);
-        setScoreType('raw');
-        setMean('100');
-        setStandardDeviation('15');
+            setInputValue('');
+            setScaleName('');
+            setName('');
+            setAgeYears('');
+            setAgeMonths('');
+            setScoreType('raw');
+            setMean('100');
+            setStandardDeviation('15');
         };
 
         const canSave = scaleName.trim() && inputValue && convertedScores.z !== null;
@@ -276,11 +258,9 @@ export default function ScoreConverter() {
                     onAgeYearsChange={setAgeYears}
                     ageMonths={ageMonths}
                     onAgeMonthsChange={setAgeMonths}
-                    imageFile={imageFile}
-                    onImageFileChange={setImageFile}
                     onSave={handleSave}
                     onReset={handleReset}
-                    canSave={canSave && !isUploading}
+                    canSave={canSave}
                 />
 
             <ClassificationBanner scores={convertedScores} />

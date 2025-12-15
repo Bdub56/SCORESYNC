@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { base44 } from '@/api/base44Client';
+import { useQuery } from '@tanstack/react-query';
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
@@ -10,8 +12,22 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import {
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
+} from "@/components/ui/command";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover";
 import { motion } from 'framer-motion';
-import { Info, Save, RotateCcw } from 'lucide-react';
+import { Info, Save, RotateCcw, Check, ChevronsUpDown } from 'lucide-react';
+import { cn } from "@/lib/utils";
 import ScoreTypeInfoModal from './ScoreTypeInfoModal';
 
 const scoreTypes = [
@@ -89,8 +105,6 @@ export default function ScoreInput({
     onAgeYearsChange,
     ageMonths,
     onAgeMonthsChange,
-    imageFile,
-    onImageFileChange,
     onSave,
     onReset,
     canSave
@@ -98,6 +112,37 @@ export default function ScoreInput({
     const range = getScoreRange(scoreType);
     const numValue = parseFloat(value) || range.min;
     const [showInfo, setShowInfo] = useState(false);
+    const [open, setOpen] = useState(false);
+
+    const { data: conversions = [] } = useQuery({
+        queryKey: ['savedConversions'],
+        queryFn: () => base44.entities.SavedConversion.list('-created_date', 500),
+    });
+
+    // Get unique subjects
+    const subjects = conversions.reduce((acc, conversion) => {
+        const name = conversion.name;
+        if (name && !acc.find(s => s.name === name)) {
+            acc.push({
+                name,
+                age_years: conversion.age_years,
+                age_months: conversion.age_months,
+                image_url: conversion.image_url
+            });
+        }
+        return acc;
+    }, []);
+
+    const handleSelectSubject = (subjectName) => {
+        const subject = subjects.find(s => s.name === subjectName);
+        if (subject) {
+            onNameChange(subject.name);
+            onAgeYearsChange(subject.age_years?.toString() || '');
+            onAgeMonthsChange(subject.age_months?.toString() || '');
+        }
+        setOpen(false);
+    };
+
     return (
         <motion.div 
             initial={{ opacity: 0, y: -20 }}
@@ -123,13 +168,62 @@ export default function ScoreInput({
                         >
                             Name
                         </Label>
-                        <Input
-                            id="name"
-                            placeholder="Enter name"
-                            value={name}
-                            onChange={(e) => onNameChange(e.target.value)}
-                            className="h-12 rounded-xl border-2 border-slate-200 bg-slate-50/50 text-base focus:border-indigo-400 focus:ring-indigo-400/20"
-                        />
+                        <Popover open={open} onOpenChange={setOpen}>
+                            <PopoverTrigger asChild>
+                                <Button
+                                    variant="outline"
+                                    role="combobox"
+                                    aria-expanded={open}
+                                    className="w-full h-12 rounded-xl border-2 border-slate-200 bg-slate-50/50 text-base focus:border-indigo-400 focus:ring-indigo-400/20 justify-between font-normal"
+                                >
+                                    {name || "Select or type name..."}
+                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-[300px] p-0" align="start">
+                                <Command>
+                                    <CommandInput 
+                                        placeholder="Search subjects..." 
+                                        value={name}
+                                        onValueChange={onNameChange}
+                                    />
+                                    <CommandList>
+                                        <CommandEmpty>
+                                            <div className="py-6 text-center text-sm">
+                                                <p className="text-slate-600">No existing subject found</p>
+                                                <p className="text-xs text-slate-400 mt-1">Type to create new</p>
+                                            </div>
+                                        </CommandEmpty>
+                                        {subjects.length > 0 && (
+                                            <CommandGroup heading="Existing Subjects">
+                                                {subjects.map((subject) => (
+                                                    <CommandItem
+                                                        key={subject.name}
+                                                        value={subject.name}
+                                                        onSelect={() => handleSelectSubject(subject.name)}
+                                                    >
+                                                        <Check
+                                                            className={cn(
+                                                                "mr-2 h-4 w-4",
+                                                                name === subject.name ? "opacity-100" : "opacity-0"
+                                                            )}
+                                                        />
+                                                        <div>
+                                                            <div>{subject.name}</div>
+                                                            {(subject.age_years || subject.age_months) && (
+                                                                <div className="text-xs text-slate-400">
+                                                                    {subject.age_years}y {subject.age_months || 0}m
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </CommandItem>
+                                                ))}
+                                            </CommandGroup>
+                                        )}
+                                    </CommandList>
+                                </Command>
+                            </PopoverContent>
+                        </Popover>
                     </div>
                     <div className="space-y-2">
                         <Label className="text-xs font-semibold uppercase tracking-wider text-slate-500">
@@ -175,22 +269,6 @@ export default function ScoreInput({
                         value={scaleName}
                         onChange={(e) => onScaleNameChange(e.target.value)}
                         className="h-12 rounded-xl border-2 border-slate-200 bg-slate-50/50 text-base focus:border-indigo-400 focus:ring-indigo-400/20"
-                    />
-                </div>
-
-                <div className="space-y-2 mb-6">
-                    <Label 
-                        htmlFor="imageUpload" 
-                        className="text-xs font-semibold uppercase tracking-wider text-slate-500"
-                    >
-                        Upload Image (Optional)
-                    </Label>
-                    <Input
-                        id="imageUpload"
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => onImageFileChange(e.target.files[0])}
-                        className="h-12 rounded-xl border-2 border-slate-200 bg-slate-50/50 text-base focus:border-indigo-400 focus:ring-indigo-400/20 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
                     />
                 </div>
 
