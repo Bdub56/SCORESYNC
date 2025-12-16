@@ -39,8 +39,8 @@ export default function SubjectDetail({ subject: initialSubject, onBack }) {
     const [editedAge, setEditedAge] = useState({ years: initialSubject.age_years || '', months: initialSubject.age_months || '' });
     const [editedImageFile, setEditedImageFile] = useState(null);
     const [imagePreview, setImagePreview] = useState(initialSubject.image_url);
-    const [editedAdminName, setEditedAdminName] = useState(conversions[0]?.administrator_name || '');
-    const [editedAdminEmail, setEditedAdminEmail] = useState(conversions[0]?.administrator_email || '');
+    const [editedAdminName, setEditedAdminName] = useState(initialSubject.conversions?.[0]?.administrator_name || '');
+    const [editedAdminEmail, setEditedAdminEmail] = useState(initialSubject.conversions?.[0]?.administrator_email || '');
     const [showChart, setShowChart] = useState(false);
     const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
     const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
