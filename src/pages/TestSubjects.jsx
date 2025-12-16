@@ -81,6 +81,29 @@ export default function TestSubjects() {
         }
     };
 
+    const deleteSubjectMutation = useMutation({
+        mutationFn: async (subject) => {
+            const deletePromises = subject.conversions.map(conversion => 
+                base44.entities.SavedConversion.delete(conversion.id)
+            );
+            await Promise.all(deletePromises);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['savedConversions'] });
+            toast.success('Subject deleted successfully!');
+        },
+        onError: () => {
+            toast.error('Failed to delete subject');
+        }
+    });
+
+    const handleDeleteSubject = async (subject, e) => {
+        e.stopPropagation();
+        if (window.confirm(`Are you sure you want to delete ${subject.name} and all associated test results?`)) {
+            deleteSubjectMutation.mutate(subject);
+        }
+    };
+
     if (selectedSubject) {
         return (
             <SubjectDetail 
@@ -151,6 +174,8 @@ export default function TestSubjects() {
                                 key={subject.name}
                                 subject={subject}
                                 onClick={() => setSelectedSubject(subject)}
+                                onDelete={(e) => handleDeleteSubject(subject, e)}
+                                isDeleting={deleteSubjectMutation.isPending}
                             />
                         ))}
                     </div>
