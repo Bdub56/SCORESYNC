@@ -2,11 +2,13 @@ import React, { useState, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Printer, Edit2, Save, X, Trash2, BarChart3, Download } from 'lucide-react';
+import { ArrowLeft, Printer, Edit2, Save, X, Trash2, BarChart3, Download, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import NormalCurveChart from '../converter/NormalCurveChart';
 import moment from 'moment';
@@ -37,6 +39,8 @@ export default function SubjectDetail({ subject, onBack }) {
     const [editedAge, setEditedAge] = useState({ years: subject.age_years || '', months: subject.age_months || '' });
     const [showChart, setShowChart] = useState(false);
     const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+    const [subjectSummary, setSubjectSummary] = useState(subject.conversions[0]?.summary || '');
+    const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
     
     const reportRef = useRef(null);
     const chartRef = useRef(null);
@@ -113,10 +117,28 @@ export default function SubjectDetail({ subject, onBack }) {
             pdf.text(`Number of Tests: ${subject.conversions.length}`, margin, yPosition);
             yPosition += 12;
 
+            // Narrative Summary Section
+            if (subjectSummary) {
+                pdf.setFontSize(14);
+                pdf.setFont('helvetica', 'bold');
+                pdf.text('Narrative Summary', margin, yPosition);
+                yPosition += 8;
+                pdf.setFontSize(10);
+                pdf.setFont('helvetica', 'normal');
+                const splitSummary = pdf.splitTextToSize(subjectSummary, pageWidth - (margin * 2));
+                pdf.text(splitSummary, margin, yPosition);
+                yPosition += (splitSummary.length * 5) + 10;
+                
+                if (yPosition > pageHeight - 50) {
+                    pdf.addPage();
+                    yPosition = margin;
+                }
+            }
+
             // Score Summary Section
             pdf.setFontSize(14);
             pdf.setFont('helvetica', 'bold');
-            pdf.text('Score Summary', margin, yPosition);
+            pdf.text('Test Results', margin, yPosition);
             yPosition += 8;
 
             // Table headers
@@ -346,6 +368,92 @@ export default function SubjectDetail({ subject, onBack }) {
                             <Badge variant="outline">
                                 {subject.conversions.length} test result{subject.conversions.length !== 1 ? 's' : ''}
                             </Badge>
+                        </div>
+
+                        <div className="mb-6 p-6 bg-slate-50 rounded-2xl border border-slate-200">
+                            <div className="flex items-center justify-between mb-4">
+                                <Label htmlFor="subject-summary" className="text-sm font-semibold text-slate-700">
+                                    Subject Summary
+                                </Label>
+                                <div className="flex gap-2">
+                                    <Button
+                                        onClick={async () => {
+                                            setIsGeneratingSummary(true);
+                                            try {
+                                                const conversionsData = subject.conversions.map(c => ({
+                                                    scale: c.scale_name,
+                                                    type: c.score_type,
+                                                    input: c.input_value,
+                                                    z_score: c.z_score?.toFixed(2),
+                                                    t_score: c.t_score?.toFixed(2),
+                                                    percentile: c.percentile?.toFixed(2),
+                                                    standard: c.standard_score?.toFixed(2),
+                                                    classification: getClassificationLabel(c.standard_score, c.z_score, c.t_score, c.percentile).label
+                                                }));
+
+                                                const result = await base44.integrations.Core.InvokeLLM({
+                                                    prompt: `You are a psychometric assessment expert. Create a professional narrative summary of the following psychometric test scores for ${subject.name}. The summary should:
+
+1. Provide an overview of the assessment results
+2. Describe the pattern of strengths and weaknesses
+3. Interpret what the scores mean in practical terms
+4. Be written in a clear, professional tone suitable for a psychological report
+5. Be 2-3 paragraphs long
+
+Here are the scores:
+${JSON.stringify(conversionsData, null, 2)}
+
+Write the narrative summary now:`,
+                                                });
+                                                setSubjectSummary(result);
+                                                toast.success('Summary generated!');
+                                            } catch (error) {
+                                                toast.error('Failed to generate summary');
+                                                console.error(error);
+                                            } finally {
+                                                setIsGeneratingSummary(false);
+                                            }
+                                        }}
+                                        disabled={isGeneratingSummary}
+                                        variant="outline"
+                                        size="sm"
+                                    >
+                                        <Sparkles className="w-4 h-4 mr-2" />
+                                        {isGeneratingSummary ? 'Generating...' : 'Generate Summary'}
+                                    </Button>
+                                    <Button
+                                        onClick={async () => {
+                                            if (!subjectSummary.trim()) {
+                                                toast.error('Please enter or generate a summary first');
+                                                return;
+                                            }
+                                            try {
+                                                const updates = subject.conversions.map(conversion =>
+                                                    base44.entities.SavedConversion.update(conversion.id, { summary: subjectSummary })
+                                                );
+                                                await Promise.all(updates);
+                                                queryClient.invalidateQueries({ queryKey: ['savedConversions'] });
+                                                toast.success('Summary saved!');
+                                            } catch (error) {
+                                                toast.error('Failed to save summary');
+                                            }
+                                        }}
+                                        disabled={!subjectSummary.trim()}
+                                        size="sm"
+                                        className="bg-indigo-600 hover:bg-indigo-700"
+                                    >
+                                        <Save className="w-4 h-4 mr-2" />
+                                        Save Summary
+                                    </Button>
+                                </div>
+                            </div>
+                            <Textarea
+                                id="subject-summary"
+                                value={subjectSummary}
+                                onChange={(e) => setSubjectSummary(e.target.value)}
+                                placeholder="Generate a summary or type one here..."
+                                className="min-h-[150px] resize-y"
+                            />
                         </div>
 
                         <div className="overflow-x-auto">

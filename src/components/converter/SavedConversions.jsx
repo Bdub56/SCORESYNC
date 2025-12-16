@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trash2, History, Sparkles, BarChart3 } from 'lucide-react';
+import { Trash2, History, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -31,8 +31,6 @@ function getClassificationLabel(standardScore, zScore, tScore, percentile) {
 
 export default function SavedConversions() {
     const queryClient = useQueryClient();
-    const [summary, setSummary] = useState('');
-    const [isGenerating, setIsGenerating] = useState(false);
     const [showChart, setShowChart] = useState(false);
 
     const { data: savedConversions = [], isLoading } = useQuery({
@@ -47,50 +45,6 @@ export default function SavedConversions() {
             toast.success('Conversion deleted');
         },
     });
-
-    const generateSummary = async () => {
-        if (savedConversions.length === 0) {
-            toast.error('No saved conversions to summarize');
-            return;
-        }
-
-        setIsGenerating(true);
-        try {
-            const conversionsData = savedConversions.map(c => ({
-                scale: c.scale_name,
-                type: c.score_type,
-                input: c.input_value,
-                z_score: c.z_score?.toFixed(2),
-                t_score: c.t_score?.toFixed(2),
-                percentile: c.percentile?.toFixed(2),
-                standard: c.standard_score?.toFixed(2),
-                classification: getClassificationLabel(c.standard_score, c.z_score, c.t_score, c.percentile).label
-            }));
-
-            const result = await base44.integrations.Core.InvokeLLM({
-                prompt: `You are a psychometric assessment expert. Create a professional narrative summary of the following psychometric test scores. The summary should:
-                
-1. Provide an overview of the assessment results
-2. Describe the pattern of strengths and weaknesses
-3. Interpret what the scores mean in practical terms
-4. Be written in a clear, professional tone suitable for a psychological report
-5. Be 2-3 paragraphs long
-
-Here are the scores:
-${JSON.stringify(conversionsData, null, 2)}
-
-Write the narrative summary now:`,
-            });
-
-            setSummary(result);
-            toast.success('Summary generated!');
-        } catch (error) {
-            toast.error('Failed to generate summary');
-            console.error(error);
-        } finally {
-            setIsGenerating(false);
-        }
-    };
 
     return (
         <motion.div
