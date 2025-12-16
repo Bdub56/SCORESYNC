@@ -142,6 +142,8 @@ export default function ScoreConverter() {
     const [name, setName] = useState('');
     const [ageYears, setAgeYears] = useState('');
     const [ageMonths, setAgeMonths] = useState('');
+    const [administratorName, setAdministratorName] = useState('');
+    const [administratorEmail, setAdministratorEmail] = useState('');
 
     const queryClient = useQueryClient();
 
@@ -214,6 +216,8 @@ export default function ScoreConverter() {
                 name: name.trim() || null,
                 age_years: ageYears ? parseFloat(ageYears) : null,
                 age_months: ageMonths ? parseFloat(ageMonths) : null,
+                administrator_name: administratorName.trim() || null,
+                administrator_email: administratorEmail.trim() || null,
                 scale_name: scaleName,
                 score_type: scoreType,
                 input_value: parseFloat(inputValue),
@@ -233,6 +237,8 @@ export default function ScoreConverter() {
             setName('');
             setAgeYears('');
             setAgeMonths('');
+            setAdministratorName('');
+            setAdministratorEmail('');
             setScoreType('raw');
             setMean('100');
             setStandardDeviation('15');
@@ -359,6 +365,10 @@ export default function ScoreConverter() {
                     onAgeYearsChange={setAgeYears}
                     ageMonths={ageMonths}
                     onAgeMonthsChange={setAgeMonths}
+                    administratorName={administratorName}
+                    onAdministratorNameChange={setAdministratorName}
+                    administratorEmail={administratorEmail}
+                    onAdministratorEmailChange={setAdministratorEmail}
                     onSave={handleSave}
                     onReset={handleReset}
                     canSave={canSave}

@@ -105,6 +105,10 @@ export default function ScoreInput({
     onAgeYearsChange,
     ageMonths,
     onAgeMonthsChange,
+    administratorName,
+    onAdministratorNameChange,
+    administratorEmail,
+    onAdministratorEmailChange,
     onSave,
     onReset,
     canSave,
@@ -272,6 +276,40 @@ export default function ScoreInput({
                         onChange={(e) => onScaleNameChange(e.target.value)}
                         className="h-12 rounded-xl border-2 border-slate-200 bg-slate-50/50 text-base focus:border-indigo-400 focus:ring-indigo-400/20"
                     />
+                </div>
+
+                <div className="grid gap-6 md:grid-cols-2 mb-6">
+                    <div className="space-y-2">
+                        <Label 
+                            htmlFor="administratorName" 
+                            className="text-xs font-semibold uppercase tracking-wider text-slate-500"
+                        >
+                            Administrator Name
+                        </Label>
+                        <Input
+                            id="administratorName"
+                            placeholder="e.g., Dr. Smith"
+                            value={administratorName}
+                            onChange={(e) => onAdministratorNameChange(e.target.value)}
+                            className="h-12 rounded-xl border-2 border-slate-200 bg-slate-50/50 text-base focus:border-indigo-400 focus:ring-indigo-400/20"
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <Label 
+                            htmlFor="administratorEmail" 
+                            className="text-xs font-semibold uppercase tracking-wider text-slate-500"
+                        >
+                            Administrator Email
+                        </Label>
+                        <Input
+                            id="administratorEmail"
+                            type="email"
+                            placeholder="e.g., smith@example.com"
+                            value={administratorEmail}
+                            onChange={(e) => onAdministratorEmailChange(e.target.value)}
+                            className="h-12 rounded-xl border-2 border-slate-200 bg-slate-50/50 text-base focus:border-indigo-400 focus:ring-indigo-400/20"
+                        />
+                    </div>
                 </div>
 
                 <div className="grid gap-6 md:grid-cols-2">

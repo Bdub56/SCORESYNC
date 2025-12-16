@@ -39,6 +39,8 @@ export default function SubjectDetail({ subject: initialSubject, onBack }) {
     const [editedAge, setEditedAge] = useState({ years: initialSubject.age_years || '', months: initialSubject.age_months || '' });
     const [editedImageFile, setEditedImageFile] = useState(null);
     const [imagePreview, setImagePreview] = useState(initialSubject.image_url);
+    const [editedAdminName, setEditedAdminName] = useState(conversions[0]?.administrator_name || '');
+    const [editedAdminEmail, setEditedAdminEmail] = useState(conversions[0]?.administrator_email || '');
     const [showChart, setShowChart] = useState(false);
     const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
     const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
@@ -106,6 +108,8 @@ export default function SubjectDetail({ subject: initialSubject, onBack }) {
                 age_years: editedAge.years ? parseFloat(editedAge.years) : null,
                 age_months: editedAge.months ? parseFloat(editedAge.months) : null,
                 image_url: imageUrl,
+                administrator_name: editedAdminName.trim() || null,
+                administrator_email: editedAdminEmail.trim() || null,
             }
         }));
 
@@ -398,7 +402,22 @@ export default function SubjectDetail({ subject: initialSubject, onBack }) {
                                                     className="w-32"
                                                 />
                                             </div>
-                                        </div>
+                                            <div className="flex gap-3">
+                                                <Input
+                                                    placeholder="Administrator Name"
+                                                    value={editedAdminName}
+                                                    onChange={(e) => setEditedAdminName(e.target.value)}
+                                                    className="flex-1"
+                                                />
+                                                <Input
+                                                    type="email"
+                                                    placeholder="Administrator Email"
+                                                    value={editedAdminEmail}
+                                                    onChange={(e) => setEditedAdminEmail(e.target.value)}
+                                                    className="flex-1"
+                                                />
+                                            </div>
+                                            </div>
                                     ) : (
                                         <>
                                             <h1 className="text-3xl font-bold text-slate-800 mb-2">
@@ -407,6 +426,11 @@ export default function SubjectDetail({ subject: initialSubject, onBack }) {
                                             {(subject.age_years || subject.age_months) && (
                                                 <p className="text-slate-600">
                                                     Age: {subject.age_years || 0}y {subject.age_months || 0}m
+                                                </p>
+                                            )}
+                                            {(subject.conversions[0]?.administrator_name || subject.conversions[0]?.administrator_email) && (
+                                                <p className="text-sm text-slate-500 mt-1">
+                                                    Administrator: {subject.conversions[0]?.administrator_name || subject.conversions[0]?.administrator_email}
                                                 </p>
                                             )}
                                         </>
