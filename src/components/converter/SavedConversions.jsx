@@ -192,24 +192,24 @@ export default function SavedConversions() {
                         </Button>
                     </div>
 
-                    <AnimatePresence>
-                        {showChart && (
-                            <motion.div
-                                initial={{ opacity: 0, height: 0 }}
-                                animate={{ opacity: 1, height: 'auto' }}
-                                exit={{ opacity: 0, height: 0 }}
-                                transition={{ duration: 0.3 }}
-                                className="mt-6 p-6 bg-slate-50 rounded-2xl border border-slate-200"
-                            >
-                                <h4 className="text-lg font-semibold text-slate-800 mb-4">
-                                    Score Distribution on Normal Curve
-                                </h4>
-                                <NormalCurveChart conversions={savedConversions} />
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                </>
             )}
+
+            <AnimatePresence>
+                {showChart && savedConversions.length > 0 && (
+                    <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="mt-6 p-6 bg-slate-50 rounded-2xl border border-slate-200"
+                    >
+                        <h4 className="text-lg font-semibold text-slate-800 mb-4">
+                            Score Distribution on Normal Curve
+                        </h4>
+                        <NormalCurveChart conversions={savedConversions} />
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </motion.div>
     );
 }
