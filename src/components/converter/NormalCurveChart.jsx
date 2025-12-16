@@ -85,7 +85,7 @@ export default function NormalCurveChart({ conversions }) {
                             stroke={point.fill}
                             strokeWidth={3}
                             label={{
-                                value: point.name || point.label,
+                                value: point.label,
                                 position: 'top',
                                 fill: point.fill,
                                 fontSize: 11,
