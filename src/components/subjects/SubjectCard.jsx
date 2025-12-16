@@ -11,6 +11,15 @@ export default function SubjectCard({ subject, onClick, onDelete, isDeleting }) 
         ? `${subject.age_years}y ${subject.age_months || 0}m`
         : 'Age not specified';
 
+    // Calculate score summaries
+    const avgStandardScore = subject.conversions.length > 0
+        ? (subject.conversions.reduce((sum, c) => sum + (c.standard_score || 0), 0) / subject.conversions.length).toFixed(0)
+        : null;
+    
+    const avgPercentile = subject.conversions.length > 0
+        ? (subject.conversions.reduce((sum, c) => sum + (c.percentile || 0), 0) / subject.conversions.length).toFixed(0)
+        : null;
+
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -60,6 +69,20 @@ export default function SubjectCard({ subject, onClick, onDelete, isDeleting }) 
                                 <span>{subject.conversions.length} test{subject.conversions.length !== 1 ? 's' : ''}</span>
                             </div>
                         </div>
+
+                        {avgStandardScore && (
+                            <div className="mt-3 p-2 bg-slate-50 rounded-lg border border-slate-200">
+                                <div className="text-xs text-slate-500 mb-1">Average Scores</div>
+                                <div className="flex gap-3 text-sm font-medium">
+                                    <span className="text-slate-700">
+                                        SS: <span className="text-indigo-600">{avgStandardScore}</span>
+                                    </span>
+                                    <span className="text-slate-700">
+                                        %ile: <span className="text-indigo-600">{avgPercentile}</span>
+                                    </span>
+                                </div>
+                            </div>
+                        )}
 
                         <div className="mt-3">
                             <Badge variant="outline" className="text-xs">
