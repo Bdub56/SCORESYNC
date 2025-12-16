@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import ScoreInput, { scoreTypes } from './ScoreInput';
 import ConversionResults from './ConversionResults';
 import ClassificationBanner from './ClassificationBanner';
@@ -8,6 +8,10 @@ import SavedConversions from './SavedConversions';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import jsPDF from 'jspdf';
+import { Sparkles } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 
 // Error function approximation for normal CDF
 function erf(x) {
@@ -142,8 +146,15 @@ export default function ScoreConverter() {
     const [name, setName] = useState('');
     const [ageYears, setAgeYears] = useState('');
     const [ageMonths, setAgeMonths] = useState('');
+    const [summary, setSummary] = useState('');
+    const [isGenerating, setIsGenerating] = useState(false);
 
     const queryClient = useQueryClient();
+
+    const { data: savedConversions = [] } = useQuery({
+        queryKey: ['savedConversions'],
+        queryFn: () => base44.entities.SavedConversion.list('-created_date', 50),
+    });
 
     const saveMutation = useMutation({
         mutationFn: (data) => base44.entities.SavedConversion.create(data),
@@ -340,6 +351,68 @@ export default function ScoreConverter() {
 
         const canSave = scaleName.trim() && inputValue && convertedScores.z !== null;
 
+        const getClassificationLabel = (standardScore, zScore, tScore, percentile) => {
+            if (standardScore >= 130 || zScore >= 2.0 || tScore >= 70 || percentile >= 98) {
+                return { label: 'Very Superior', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' };
+            } else if (standardScore >= 120 || zScore >= 1.33 || tScore >= 63 || percentile >= 91) {
+                return { label: 'Superior', color: 'bg-blue-50 text-blue-700 border-blue-200' };
+            } else if (standardScore >= 110 || zScore >= 0.67 || tScore >= 57 || percentile >= 75) {
+                return { label: 'High Average', color: 'bg-indigo-50 text-indigo-700 border-indigo-200' };
+            } else if (standardScore >= 90 || zScore >= -0.67 || tScore >= 43 || percentile >= 25) {
+                return { label: 'Average', color: 'bg-slate-50 text-slate-700 border-slate-200' };
+            } else if (standardScore >= 80 || zScore >= -1.33 || tScore >= 37 || percentile >= 9) {
+                return { label: 'Low Average', color: 'bg-amber-50 text-amber-700 border-amber-200' };
+            } else if (standardScore >= 70 || zScore >= -2.0 || tScore >= 30 || percentile >= 3) {
+                return { label: 'Borderline', color: 'bg-orange-50 text-orange-700 border-orange-200' };
+            } else {
+                return { label: 'Extremely Low', color: 'bg-red-50 text-red-700 border-red-200' };
+            }
+        };
+
+        const generateSummary = async () => {
+            if (savedConversions.length === 0) {
+                toast.error('No saved conversions to summarize');
+                return;
+            }
+
+            setIsGenerating(true);
+            try {
+                const conversionsData = savedConversions.map(c => ({
+                    scale: c.scale_name,
+                    type: c.score_type,
+                    input: c.input_value,
+                    z_score: c.z_score?.toFixed(2),
+                    t_score: c.t_score?.toFixed(2),
+                    percentile: c.percentile?.toFixed(2),
+                    standard: c.standard_score?.toFixed(2),
+                    classification: getClassificationLabel(c.standard_score, c.z_score, c.t_score, c.percentile).label
+                }));
+
+                const result = await base44.integrations.Core.InvokeLLM({
+                    prompt: `You are a psychometric assessment expert. Create a professional narrative summary of the following psychometric test scores. The summary should:
+
+        1. Provide an overview of the assessment results
+        2. Describe the pattern of strengths and weaknesses
+        3. Interpret what the scores mean in practical terms
+        4. Be written in a clear, professional tone suitable for a psychological report
+        5. Be 2-3 paragraphs long
+
+        Here are the scores:
+        ${JSON.stringify(conversionsData, null, 2)}
+
+        Write the narrative summary now:`,
+                });
+
+                setSummary(result);
+                toast.success('Summary generated!');
+            } catch (error) {
+                toast.error('Failed to generate summary');
+                console.error(error);
+            } finally {
+                setIsGenerating(false);
+            }
+        };
+
         return (
         <div className="space-y-8">
                 <ScoreInput
@@ -378,6 +451,36 @@ export default function ScoreConverter() {
                     activeType={scoreType}
                 />
             </motion.div>
+
+            {savedConversions.length > 0 && (
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.2 }}
+                    className="bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 p-8 mt-8"
+                >
+                    <div className="flex items-center justify-between mb-4">
+                        <Label htmlFor="summary" className="text-sm font-semibold text-slate-700">
+                            Score Summary
+                        </Label>
+                        <Button
+                            onClick={generateSummary}
+                            disabled={isGenerating}
+                            className="bg-indigo-600 hover:bg-indigo-700"
+                        >
+                            <Sparkles className="w-4 h-4 mr-2" />
+                            {isGenerating ? 'Generating...' : 'Generate Summary'}
+                        </Button>
+                    </div>
+                    <Textarea
+                        id="summary"
+                        value={summary}
+                        onChange={(e) => setSummary(e.target.value)}
+                        placeholder="Click 'Generate Summary' to create an AI-powered narrative summary of your saved scores..."
+                        className="min-h-[200px] resize-y"
+                    />
+                </motion.div>
+            )}
 
             <SavedConversions />
             </div>
