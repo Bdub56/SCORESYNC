@@ -1,10 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { createPageUrl } from '@/utils';
-import { Button } from '@/components/ui/button';
-import { FileText } from 'lucide-react';
 import ScoreInput, { scoreTypes } from './ScoreInput';
 import ConversionResults from './ConversionResults';
 import ClassificationBanner from './ClassificationBanner';
@@ -146,9 +142,7 @@ export default function ScoreConverter() {
     const [name, setName] = useState('');
     const [ageYears, setAgeYears] = useState('');
     const [ageMonths, setAgeMonths] = useState('');
-    const [imageUrl, setImageUrl] = useState(null);
 
-    const navigate = useNavigate();
     const queryClient = useQueryClient();
 
     const saveMutation = useMutation({
@@ -255,128 +249,93 @@ export default function ScoreConverter() {
             return { label: 'Extremely Low', color: '#ef4444' };
         };
 
-        const handleSaveReport = async () => {
+        const handleSaveReport = () => {
             if (!scaleName.trim() || !inputValue || convertedScores.z === null) {
                 toast.error('Please enter valid data before generating report');
                 return;
             }
 
-            try {
-                // Get classification summary
-                const classification = getClassification(convertedScores);
-                const scoreTypeLabel = scoreTypes.find(t => t.value === scoreType)?.label || scoreType;
-                
-                const summary = `${classification.label} range. Input: ${scoreTypeLabel} = ${inputValue}. Standard Score: ${convertedScores.standard?.toFixed(0)}, Percentile: ${convertedScores.percentile?.toFixed(1)}%`;
+            const doc = new jsPDF();
+            const classification = getClassification(convertedScores);
 
-                // Save to database with summary
-                await saveMutation.mutateAsync({
-                    name: name.trim() || null,
-                    age_years: ageYears ? parseFloat(ageYears) : null,
-                    age_months: ageMonths ? parseFloat(ageMonths) : null,
-                    image_url: imageUrl,
-                    scale_name: scaleName,
-                    score_type: scoreType,
-                    input_value: parseFloat(inputValue),
-                    mean: parseFloat(mean),
-                    standard_deviation: parseFloat(standardDeviation),
-                    z_score: convertedScores.z,
-                    t_score: convertedScores.t,
-                    percentile: convertedScores.percentile,
-                    standard_score: convertedScores.standard,
-                    scaled_score: convertedScores.scaled,
-                    summary: summary
-                });
+            // Title
+            doc.setFontSize(20);
+            doc.setTextColor(51, 65, 85);
+            doc.text('Psychometric Score Report', 105, 20, { align: 'center' });
 
-                // Generate PDF
-                const doc = new jsPDF();
+            // Subject Info
+            doc.setFontSize(12);
+            doc.setTextColor(100, 116, 139);
+            let yPos = 40;
 
-                // Title
-                doc.setFontSize(20);
-                doc.setTextColor(51, 65, 85);
-                doc.text('Psychometric Score Report', 105, 20, { align: 'center' });
-
-                // Subject Info
-                doc.setFontSize(12);
-                doc.setTextColor(100, 116, 139);
-                let yPos = 40;
-
-                if (name) {
-                    doc.text(`Subject: ${name}`, 20, yPos);
-                    yPos += 8;
-                }
-
-                if (ageYears || ageMonths) {
-                    const ageStr = `${ageYears || 0} years ${ageMonths || 0} months`;
-                    doc.text(`Age: ${ageStr}`, 20, yPos);
-                    yPos += 8;
-                }
-
-                doc.text(`Test: ${scaleName}`, 20, yPos);
+            if (name) {
+                doc.text(`Subject: ${name}`, 20, yPos);
                 yPos += 8;
-                doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, yPos);
-                yPos += 15;
-
-                // Input Score
-                doc.setFontSize(14);
-                doc.setTextColor(51, 65, 85);
-                doc.text('Input Score', 20, yPos);
-                yPos += 8;
-                doc.setFontSize(11);
-                doc.setTextColor(100, 116, 139);
-                doc.text(`${scoreTypeLabel}: ${inputValue}`, 20, yPos);
-                yPos += 15;
-
-                // Classification
-                doc.setFontSize(14);
-                doc.setTextColor(51, 65, 85);
-                doc.text('Classification', 20, yPos);
-                yPos += 8;
-                doc.setFontSize(12);
-                doc.setTextColor(classification.color);
-                doc.text(classification.label, 20, yPos);
-                yPos += 15;
-
-                // Converted Scores
-                doc.setFontSize(14);
-                doc.setTextColor(51, 65, 85);
-                doc.text('Converted Scores', 20, yPos);
-                yPos += 10;
-
-                doc.setFontSize(11);
-                doc.setTextColor(100, 116, 139);
-                const scores = [
-                    { label: 'Z-Score', value: convertedScores.z?.toFixed(2) },
-                    { label: 'T-Score', value: convertedScores.t?.toFixed(1) },
-                    { label: 'Percentile', value: convertedScores.percentile?.toFixed(1) + '%' },
-                    { label: 'Standard Score (IQ)', value: convertedScores.standard?.toFixed(0) },
-                    { label: 'Scaled Score', value: convertedScores.scaled?.toFixed(1) }
-                ];
-
-                scores.forEach(score => {
-                    doc.text(`${score.label}: ${score.value}`, 20, yPos);
-                    yPos += 7;
-                });
-
-                // Footer
-                doc.setFontSize(8);
-                doc.setTextColor(148, 163, 184);
-                doc.text('Generated by Score Sync - Psychometric Score Converter', 105, 280, { align: 'center' });
-                doc.text('All conversions assume normally distributed data', 105, 285, { align: 'center' });
-
-                // Save PDF
-                const fileName = `${scaleName.replace(/[^a-z0-9]/gi, '_')}_${name || 'report'}_${new Date().toISOString().split('T')[0]}.pdf`;
-                doc.save(fileName);
-                
-                toast.success('Report saved and data stored!');
-                
-                // Redirect to test subjects page
-                setTimeout(() => {
-                    navigate(createPageUrl('TestSubjects'));
-                }, 1000);
-            } catch (error) {
-                toast.error('Failed to save report');
-                console.error(error);
             }
+
+            if (ageYears || ageMonths) {
+                const ageStr = `${ageYears || 0} years ${ageMonths || 0} months`;
+                doc.text(`Age: ${ageStr}`, 20, yPos);
+                yPos += 8;
+            }
+
+            doc.text(`Test: ${scaleName}`, 20, yPos);
+            yPos += 8;
+            doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, yPos);
+            yPos += 15;
+
+            // Input Score
+            doc.setFontSize(14);
+            doc.setTextColor(51, 65, 85);
+            doc.text('Input Score', 20, yPos);
+            yPos += 8;
+            doc.setFontSize(11);
+            doc.setTextColor(100, 116, 139);
+            const scoreTypeLabel = scoreTypes.find(t => t.value === scoreType)?.label || scoreType;
+            doc.text(`${scoreTypeLabel}: ${inputValue}`, 20, yPos);
+            yPos += 15;
+
+            // Classification
+            doc.setFontSize(14);
+            doc.setTextColor(51, 65, 85);
+            doc.text('Classification', 20, yPos);
+            yPos += 8;
+            doc.setFontSize(12);
+            doc.setTextColor(classification.color);
+            doc.text(classification.label, 20, yPos);
+            yPos += 15;
+
+            // Converted Scores
+            doc.setFontSize(14);
+            doc.setTextColor(51, 65, 85);
+            doc.text('Converted Scores', 20, yPos);
+            yPos += 10;
+
+            doc.setFontSize(11);
+            doc.setTextColor(100, 116, 139);
+            const scores = [
+                { label: 'Z-Score', value: convertedScores.z?.toFixed(2) },
+                { label: 'T-Score', value: convertedScores.t?.toFixed(1) },
+                { label: 'Percentile', value: convertedScores.percentile?.toFixed(1) + '%' },
+                { label: 'Standard Score (IQ)', value: convertedScores.standard?.toFixed(0) },
+                { label: 'Scaled Score', value: convertedScores.scaled?.toFixed(1) }
+            ];
+
+            scores.forEach(score => {
+                doc.text(`${score.label}: ${score.value}`, 20, yPos);
+                yPos += 7;
+            });
+
+            // Footer
+            doc.setFontSize(8);
+            doc.setTextColor(148, 163, 184);
+            doc.text('Generated by Score Sync - Psychometric Score Converter', 105, 280, { align: 'center' });
+            doc.text('All conversions assume normally distributed data', 105, 285, { align: 'center' });
+
+            // Save
+            const fileName = `${scaleName.replace(/[^a-z0-9]/gi, '_')}_${name || 'report'}_${new Date().toISOString().split('T')[0]}.pdf`;
+            doc.save(fileName);
+            toast.success('Report saved successfully!');
         };
 
         const canSave = scaleName.trim() && inputValue && convertedScores.z !== null;
@@ -419,25 +378,6 @@ export default function ScoreConverter() {
                     activeType={scoreType}
                 />
             </motion.div>
-
-            {canSave && (
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.15 }}
-                    className="flex justify-center"
-                >
-                    <Button
-                        onClick={handleSaveReport}
-                        disabled={!canSave}
-                        size="lg"
-                        className="h-14 px-8 rounded-xl bg-indigo-600 hover:bg-indigo-700"
-                    >
-                        <FileText className="w-5 h-5 mr-2" />
-                        Save Report & View Subject
-                    </Button>
-                </motion.div>
-            )}
 
             <SavedConversions />
             </div>
