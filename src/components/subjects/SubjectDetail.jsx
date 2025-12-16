@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Printer, Edit2, Save, X, Trash2, BarChart3, Download, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -33,18 +33,35 @@ function getClassificationLabel(standardScore, zScore, tScore, percentile) {
     }
 }
 
-export default function SubjectDetail({ subject, onBack }) {
+export default function SubjectDetail({ subject: initialSubject, onBack }) {
     const [isEditing, setIsEditing] = useState(false);
-    const [editedName, setEditedName] = useState(subject.name);
-    const [editedAge, setEditedAge] = useState({ years: subject.age_years || '', months: subject.age_months || '' });
+    const [editedName, setEditedName] = useState(initialSubject.name);
+    const [editedAge, setEditedAge] = useState({ years: initialSubject.age_years || '', months: initialSubject.age_months || '' });
     const [showChart, setShowChart] = useState(false);
     const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
-    const [subjectSummary, setSubjectSummary] = useState(subject.conversions[0]?.summary || '');
     const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
     
     const reportRef = useRef(null);
     const chartRef = useRef(null);
     const queryClient = useQueryClient();
+
+    // Fetch live data for this subject
+    const { data: conversions = [], isLoading } = useQuery({
+        queryKey: ['savedConversions'],
+        queryFn: () => base44.entities.SavedConversion.list('-created_date', 500),
+        select: (data) => data.filter(c => c.name === editedName),
+    });
+
+    const [subjectSummary, setSubjectSummary] = useState(conversions[0]?.summary || '');
+
+    // Build subject object from live data
+    const subject = {
+        name: editedName,
+        age_years: editedAge.years ? parseFloat(editedAge.years) : initialSubject.age_years,
+        age_months: editedAge.months ? parseFloat(editedAge.months) : initialSubject.age_months,
+        image_url: initialSubject.image_url,
+        conversions: conversions,
+    };
 
     const updateMutation = useMutation({
         mutationFn: async ({ id, data }) => base44.entities.SavedConversion.update(id, data),
@@ -58,6 +75,10 @@ export default function SubjectDetail({ subject, onBack }) {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['savedConversions'] });
             toast.success('Test deleted');
+            // Go back if no conversions left
+            if (conversions.length <= 1) {
+                onBack();
+            }
         },
     });
 
@@ -267,6 +288,14 @@ export default function SubjectDetail({ subject, onBack }) {
             setIsGeneratingPDF(false);
         }
     };
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/30 flex items-center justify-center">
+                <div className="text-slate-500">Loading...</div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/30">
