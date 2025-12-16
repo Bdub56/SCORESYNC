@@ -379,7 +379,12 @@ export default function ScoreConverter() {
                 />
             </motion.div>
 
-            <SavedConversions subjectName={name} />
+            <SavedConversions 
+                subjectName={name} 
+                onSave={handleSave}
+                onReset={handleReset}
+                canSave={canSave}
+            />
             </div>
             );
             }

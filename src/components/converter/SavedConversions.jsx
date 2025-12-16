@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trash2, History, BarChart3 } from 'lucide-react';
+import { Trash2, History, BarChart3, Save, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -29,7 +29,7 @@ function getClassificationLabel(standardScore, zScore, tScore, percentile) {
     }
 }
 
-export default function SavedConversions({ subjectName }) {
+export default function SavedConversions({ subjectName, onSave, onReset, canSave }) {
     const queryClient = useQueryClient();
     const [showChart, setShowChart] = useState(false);
 
@@ -58,18 +58,35 @@ export default function SavedConversions({ subjectName }) {
             transition={{ duration: 0.5, delay: 0.4 }}
             className="bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 p-8 mt-8"
         >
-            <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 rounded-xl bg-indigo-100">
-                    <History className="w-5 h-5 text-indigo-600" />
+            <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-xl bg-indigo-100">
+                        <History className="w-5 h-5 text-indigo-600" />
+                    </div>
+                    <div>
+                        <h3 className="font-semibold text-slate-800">
+                            {subjectName ? `${subjectName}'s Test Results` : 'Saved Conversions'}
+                        </h3>
+                        <p className="text-sm text-slate-500">
+                            {subjectName ? `All test scores for ${subjectName}` : 'Your conversion history'}
+                        </p>
+                    </div>
                 </div>
-                <div>
-                    <h3 className="font-semibold text-slate-800">
-                        {subjectName ? `${subjectName}'s Test Results` : 'Saved Conversions'}
-                    </h3>
-                    <p className="text-sm text-slate-500">
-                        {subjectName ? `All test scores for ${subjectName}` : 'Your conversion history'}
-                    </p>
-                </div>
+                {subjectName && (
+                    <div className="flex gap-2">
+                        <Button
+                            onClick={() => {
+                                onSave();
+                                onReset();
+                            }}
+                            disabled={!canSave}
+                            className="bg-indigo-600 hover:bg-indigo-700"
+                        >
+                            <Save className="w-4 h-4 mr-2" />
+                            Save & Add Another
+                        </Button>
+                    </div>
+                )}
             </div>
 
             {isLoading ? (

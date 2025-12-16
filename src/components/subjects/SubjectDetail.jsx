@@ -404,77 +404,58 @@ export default function SubjectDetail({ subject: initialSubject, onBack }) {
                                 <Label htmlFor="subject-summary" className="text-sm font-semibold text-slate-700">
                                     Subject Summary
                                 </Label>
-                                <div className="flex gap-2">
-                                    <Button
-                                        onClick={async () => {
-                                            setIsGeneratingSummary(true);
-                                            try {
-                                                const conversionsData = subject.conversions.map(c => ({
-                                                    scale: c.scale_name,
-                                                    type: c.score_type,
-                                                    input: c.input_value,
-                                                    z_score: c.z_score?.toFixed(2),
-                                                    t_score: c.t_score?.toFixed(2),
-                                                    percentile: c.percentile?.toFixed(2),
-                                                    standard: c.standard_score?.toFixed(2),
-                                                    classification: getClassificationLabel(c.standard_score, c.z_score, c.t_score, c.percentile).label
-                                                }));
+                                <Button
+                                    onClick={async () => {
+                                        setIsGeneratingSummary(true);
+                                        try {
+                                            const conversionsData = subject.conversions.map(c => ({
+                                                scale: c.scale_name,
+                                                type: c.score_type,
+                                                input: c.input_value,
+                                                z_score: c.z_score?.toFixed(2),
+                                                t_score: c.t_score?.toFixed(2),
+                                                percentile: c.percentile?.toFixed(2),
+                                                standard: c.standard_score?.toFixed(2),
+                                                classification: getClassificationLabel(c.standard_score, c.z_score, c.t_score, c.percentile).label
+                                            }));
 
-                                                const result = await base44.integrations.Core.InvokeLLM({
-                                                    prompt: `You are a psychometric assessment expert. Create a professional narrative summary of the following psychometric test scores for ${subject.name}. The summary should:
+                                            const result = await base44.integrations.Core.InvokeLLM({
+                                                prompt: `You are a psychometric assessment expert. Create a professional narrative summary of the following psychometric test scores for ${subject.name}. The summary should:
 
-1. Provide an overview of the assessment results
-2. Describe the pattern of strengths and weaknesses
-3. Interpret what the scores mean in practical terms
-4. Be written in a clear, professional tone suitable for a psychological report
-5. Be 2-3 paragraphs long
+                            1. Provide an overview of the assessment results
+                            2. Describe the pattern of strengths and weaknesses
+                            3. Interpret what the scores mean in practical terms
+                            4. Be written in a clear, professional tone suitable for a psychological report
+                            5. Be 2-3 paragraphs long
 
-Here are the scores:
-${JSON.stringify(conversionsData, null, 2)}
+                            Here are the scores:
+                            ${JSON.stringify(conversionsData, null, 2)}
 
-Write the narrative summary now:`,
-                                                });
-                                                setSubjectSummary(result);
-                                                toast.success('Summary generated!');
-                                            } catch (error) {
-                                                toast.error('Failed to generate summary');
-                                                console.error(error);
-                                            } finally {
-                                                setIsGeneratingSummary(false);
-                                            }
-                                        }}
-                                        disabled={isGeneratingSummary}
-                                        variant="outline"
-                                        size="sm"
-                                    >
-                                        <Sparkles className="w-4 h-4 mr-2" />
-                                        {isGeneratingSummary ? 'Generating...' : 'Generate Summary'}
-                                    </Button>
-                                    <Button
-                                        onClick={async () => {
-                                            if (!subjectSummary.trim()) {
-                                                toast.error('Please enter or generate a summary first');
-                                                return;
-                                            }
-                                            try {
-                                                const updates = subject.conversions.map(conversion =>
-                                                    base44.entities.SavedConversion.update(conversion.id, { summary: subjectSummary })
-                                                );
-                                                await Promise.all(updates);
-                                                queryClient.invalidateQueries({ queryKey: ['savedConversions'] });
-                                                toast.success('Summary saved!');
-                                            } catch (error) {
-                                                toast.error('Failed to save summary');
-                                            }
-                                        }}
-                                        disabled={!subjectSummary.trim()}
-                                        size="sm"
-                                        className="bg-indigo-600 hover:bg-indigo-700"
-                                    >
-                                        <Save className="w-4 h-4 mr-2" />
-                                        Save Summary
-                                    </Button>
-                                </div>
+                            Write the narrative summary now:`,
+                                            });
+                                            setSubjectSummary(result);
+
+                                            // Auto-save the generated summary
+                                            const updates = subject.conversions.map(conversion =>
+                                                base44.entities.SavedConversion.update(conversion.id, { summary: result })
+                                            );
+                                            await Promise.all(updates);
+                                            queryClient.invalidateQueries({ queryKey: ['savedConversions'] });
+                                            toast.success('Summary generated and saved!');
+                                        } catch (error) {
+                                            toast.error('Failed to generate summary');
+                                            console.error(error);
+                                        } finally {
+                                            setIsGeneratingSummary(false);
+                                        }
+                                    }}
+                                    disabled={isGeneratingSummary}
+                                    variant="outline"
+                                    size="sm"
+                                >
+                                    <Sparkles className="w-4 h-4 mr-2" />
+                                    {isGeneratingSummary ? 'Generating...' : 'Generate Summary'}
+                                </Button>
                             </div>
                             <Textarea
                                 id="subject-summary"
