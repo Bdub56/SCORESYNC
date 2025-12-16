@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Printer, Edit2, Save, X, Trash2, BarChart3, Download, Sparkles } from 'lucide-react';
+import { ArrowLeft, Printer, Edit2, Save, X, Trash2, BarChart3, Download, Sparkles, Upload, ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -37,6 +37,8 @@ export default function SubjectDetail({ subject: initialSubject, onBack }) {
     const [isEditing, setIsEditing] = useState(false);
     const [editedName, setEditedName] = useState(initialSubject.name);
     const [editedAge, setEditedAge] = useState({ years: initialSubject.age_years || '', months: initialSubject.age_months || '' });
+    const [editedImageFile, setEditedImageFile] = useState(null);
+    const [imagePreview, setImagePreview] = useState(initialSubject.image_url);
     const [showChart, setShowChart] = useState(false);
     const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
     const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
@@ -83,6 +85,19 @@ export default function SubjectDetail({ subject: initialSubject, onBack }) {
     });
 
     const handleSaveEdit = async () => {
+        let imageUrl = imagePreview;
+        
+        // Upload new image if one was selected
+        if (editedImageFile) {
+            try {
+                const result = await base44.integrations.Core.UploadFile({ file: editedImageFile });
+                imageUrl = result.file_url;
+            } catch (error) {
+                toast.error('Failed to upload image');
+                return;
+            }
+        }
+
         const updates = subject.conversions.map(conversion => ({
             id: conversion.id,
             data: {
@@ -90,17 +105,36 @@ export default function SubjectDetail({ subject: initialSubject, onBack }) {
                 name: editedName,
                 age_years: editedAge.years ? parseFloat(editedAge.years) : null,
                 age_months: editedAge.months ? parseFloat(editedAge.months) : null,
+                image_url: imageUrl,
             }
         }));
 
         await Promise.all(updates.map(u => updateMutation.mutateAsync(u)));
         toast.success('Subject information updated');
         setIsEditing(false);
+        setEditedImageFile(null);
         
         // Update local subject data
         subject.name = editedName;
         subject.age_years = editedAge.years ? parseFloat(editedAge.years) : null;
         subject.age_months = editedAge.months ? parseFloat(editedAge.months) : null;
+        subject.image_url = imageUrl;
+    };
+
+    const handleImageChange = (e) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            if (file.size > 5 * 1024 * 1024) {
+                toast.error('Image must be less than 5MB');
+                return;
+            }
+            setEditedImageFile(file);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreview(reader.result);
+            };
+            reader.readAsDataURL(file);
+        }
     };
 
     const handlePrint = () => {
@@ -313,14 +347,32 @@ export default function SubjectDetail({ subject: initialSubject, onBack }) {
                     <div className="bg-white rounded-3xl shadow-xl border border-slate-100 p-8">
                         <div className="flex justify-between items-start mb-6">
                             <div className="flex items-start gap-4 flex-1">
-                                {subject.image_url && (
-                                    <img 
-                                        src={subject.image_url} 
-                                        alt={subject.name}
-                                        className="w-20 h-20 rounded-full object-cover border-2 border-indigo-100"
-                                    />
-                                )}
-                                
+                                <div className="relative">
+                                    {imagePreview ? (
+                                        <img 
+                                            src={imagePreview} 
+                                            alt={subject.name}
+                                            className="w-20 h-20 rounded-full object-cover border-2 border-indigo-100"
+                                        />
+                                    ) : (
+                                        <div className="w-20 h-20 rounded-full bg-indigo-100 flex items-center justify-center border-2 border-indigo-200">
+                                            <ImageIcon className="w-8 h-8 text-indigo-600" />
+                                        </div>
+                                    )}
+                                    {isEditing && (
+                                        <label htmlFor="image-upload" className="absolute bottom-0 right-0 bg-indigo-600 rounded-full p-1.5 cursor-pointer hover:bg-indigo-700 transition-colors">
+                                            <Upload className="w-3.5 h-3.5 text-white" />
+                                            <input
+                                                id="image-upload"
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={handleImageChange}
+                                                className="hidden"
+                                            />
+                                        </label>
+                                    )}
+                                </div>
+
                                 <div className="flex-1">
                                     {isEditing ? (
                                         <div className="space-y-4">
