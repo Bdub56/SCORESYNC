@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createPageUrl } from '@/utils';
+import { Button } from '@/components/ui/button';
+import { FileText } from 'lucide-react';
 import ScoreInput, { scoreTypes } from './ScoreInput';
 import ConversionResults from './ConversionResults';
 import ClassificationBanner from './ClassificationBanner';
