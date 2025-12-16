@@ -10,6 +10,10 @@ export default function SubjectCard({ subject, onClick, onDelete, isDeleting }) 
     const ageDisplay = subject.age_years 
         ? `${subject.age_years}y ${subject.age_months || 0}m`
         : 'Age not specified';
+    
+    // Get the most recent conversion with a summary
+    const latestConversion = subject.conversions.find(c => c.summary) || subject.conversions[0];
+    const summary = latestConversion?.summary;
 
     return (
         <motion.div
@@ -61,10 +65,15 @@ export default function SubjectCard({ subject, onClick, onDelete, isDeleting }) 
                             </div>
                         </div>
 
-                        <div className="mt-3">
+                        <div className="mt-3 space-y-2">
                             <Badge variant="outline" className="text-xs">
                                 Last: {moment(subject.latestDate).format('MMM D, YYYY')}
                             </Badge>
+                            {summary && (
+                                <p className="text-xs text-slate-500 line-clamp-2">
+                                    {summary}
+                                </p>
+                            )}
                         </div>
                     </div>
                 </div>

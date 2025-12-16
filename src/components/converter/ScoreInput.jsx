@@ -436,15 +436,6 @@ export default function ScoreInput({
                         Reset
                     </Button>
                     <Button
-                        onClick={onSaveReport}
-                        disabled={!canSave}
-                        variant="outline"
-                        className="flex-1 h-12 rounded-xl"
-                    >
-                        <FileText className="w-4 h-4 mr-2" />
-                        Save Report
-                    </Button>
-                    <Button
                         onClick={onSave}
                         disabled={!canSave}
                         className="flex-1 h-12 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50"
