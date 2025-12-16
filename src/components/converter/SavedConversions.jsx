@@ -29,14 +29,19 @@ function getClassificationLabel(standardScore, zScore, tScore, percentile) {
     }
 }
 
-export default function SavedConversions() {
+export default function SavedConversions({ subjectName }) {
     const queryClient = useQueryClient();
     const [showChart, setShowChart] = useState(false);
 
-    const { data: savedConversions = [], isLoading } = useQuery({
+    const { data: allConversions = [], isLoading } = useQuery({
         queryKey: ['savedConversions'],
-        queryFn: () => base44.entities.SavedConversion.list('-created_date', 50),
+        queryFn: () => base44.entities.SavedConversion.list('-created_date', 500),
     });
+
+    // Filter conversions by subject name if provided
+    const savedConversions = subjectName?.trim() 
+        ? allConversions.filter(c => c.name === subjectName.trim())
+        : [];
 
     const deleteMutation = useMutation({
         mutationFn: (id) => base44.entities.SavedConversion.delete(id),
@@ -58,8 +63,12 @@ export default function SavedConversions() {
                     <History className="w-5 h-5 text-indigo-600" />
                 </div>
                 <div>
-                    <h3 className="font-semibold text-slate-800">Saved Conversions</h3>
-                    <p className="text-sm text-slate-500">Your conversion history</p>
+                    <h3 className="font-semibold text-slate-800">
+                        {subjectName ? `${subjectName}'s Test Results` : 'Saved Conversions'}
+                    </h3>
+                    <p className="text-sm text-slate-500">
+                        {subjectName ? `All test scores for ${subjectName}` : 'Your conversion history'}
+                    </p>
                 </div>
             </div>
 
@@ -67,7 +76,9 @@ export default function SavedConversions() {
                 <div className="text-center py-8 text-slate-500">Loading...</div>
             ) : savedConversions.length === 0 ? (
                 <div className="text-center py-8 text-slate-500">
-                    No saved conversions yet. Enter a scale name and save your first conversion!
+                    {subjectName 
+                        ? `No test results saved for ${subjectName} yet.` 
+                        : 'Enter a name and save conversions to see results here.'}
                 </div>
             ) : (
                 <div className="overflow-x-auto">

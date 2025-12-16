@@ -379,7 +379,7 @@ export default function ScoreConverter() {
                 />
             </motion.div>
 
-            <SavedConversions />
+            <SavedConversions subjectName={name} />
             </div>
             );
             }
