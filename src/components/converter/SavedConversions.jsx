@@ -135,63 +135,16 @@ export default function SavedConversions() {
             )}
 
             {savedConversions.length > 0 && (
-                <>
-                    <div className="mt-8 pt-8 border-t border-slate-200">
-                        <div className="flex items-center justify-between mb-4">
-                            <Label htmlFor="summary" className="text-sm font-semibold text-slate-700">
-                                Score Summary
-                            </Label>
-                            <Button
-                                onClick={generateSummary}
-                                disabled={isGenerating}
-                                className="bg-indigo-600 hover:bg-indigo-700"
-                            >
-                                <Sparkles className="w-4 h-4 mr-2" />
-                                {isGenerating ? 'Generating...' : 'Generate Summary'}
-                            </Button>
-                        </div>
-                        <Textarea
-                            id="summary"
-                            value={summary}
-                            onChange={(e) => setSummary(e.target.value)}
-                            placeholder="Click 'Generate Summary' to create an AI-powered narrative summary of your saved scores..."
-                            className="min-h-[200px] resize-y"
-                        />
-                        <Button
-                            onClick={async () => {
-                                if (!summary.trim()) {
-                                    toast.error('Please enter or generate a summary first');
-                                    return;
-                                }
-                                try {
-                                    const updates = savedConversions.map(conversion =>
-                                        base44.entities.SavedConversion.update(conversion.id, { summary: summary })
-                                    );
-                                    await Promise.all(updates);
-                                    queryClient.invalidateQueries({ queryKey: ['savedConversions'] });
-                                    toast.success('Summary saved to all conversions!');
-                                } catch (error) {
-                                    toast.error('Failed to save summary');
-                                }
-                            }}
-                            disabled={!summary.trim()}
-                            className="mt-4 bg-indigo-600 hover:bg-indigo-700"
-                        >
-                            Save Summary
-                        </Button>
-                    </div>
-
-                    <div className="mt-6 flex justify-center">
-                        <Button
-                            onClick={() => setShowChart(!showChart)}
-                            variant="outline"
-                            size="lg"
-                        >
-                            <BarChart3 className="w-4 h-4 mr-2" />
-                            {showChart ? 'Hide' : 'Show'} Normal Distribution Plot
-                        </Button>
-                    </div>
-
+                <div className="mt-6 flex justify-center">
+                    <Button
+                        onClick={() => setShowChart(!showChart)}
+                        variant="outline"
+                        size="lg"
+                    >
+                        <BarChart3 className="w-4 h-4 mr-2" />
+                        {showChart ? 'Hide' : 'Show'} Normal Distribution Plot
+                    </Button>
+                </div>
             )}
 
             <AnimatePresence>
