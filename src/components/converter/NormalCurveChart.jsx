@@ -1,5 +1,5 @@
 import React from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Scatter, ScatterChart, ZAxis } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Legend } from 'recharts';
 
 // Generate normal distribution curve data
 function generateNormalCurve() {
@@ -28,7 +28,7 @@ export default function NormalCurveChart({ conversions }) {
     return (
         <div className="w-full h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={curveData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+                <LineChart data={curveData} margin={{ top: 20, right: 30, left: 20, bottom: 80 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                     <XAxis 
                         dataKey="z" 
@@ -57,6 +57,23 @@ export default function NormalCurveChart({ conversions }) {
                             return null;
                         }}
                     />
+                    <Legend 
+                        content={() => (
+                            <div className="flex flex-wrap gap-3 justify-center mt-4">
+                                {scatterData.map((point, idx) => (
+                                    <div key={idx} className="flex items-center gap-2">
+                                        <div 
+                                            className="w-3 h-3 rounded-full" 
+                                            style={{ backgroundColor: point.fill }}
+                                        />
+                                        <span className="text-xs text-slate-600">
+                                            {point.label} (z={point.z.toFixed(2)})
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    />
                     
                     {/* Normal curve */}
                     <Line 
@@ -84,13 +101,6 @@ export default function NormalCurveChart({ conversions }) {
                             x={point.z}
                             stroke={point.fill}
                             strokeWidth={3}
-                            label={{
-                                value: point.label,
-                                position: 'top',
-                                fill: point.fill,
-                                fontSize: 11,
-                                fontWeight: 600
-                            }}
                         />
                     ))}
                 </LineChart>
