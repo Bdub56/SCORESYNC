@@ -210,7 +210,7 @@ export default function ScoreConverter() {
                 return;
             }
 
-            saveMutation.mutate({
+            return saveMutation.mutateAsync({
                 name: name.trim() || null,
                 age_years: ageYears ? parseFloat(ageYears) : null,
                 age_months: ageMonths ? parseFloat(ageMonths) : null,

@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trash2, History, BarChart3, Save, RotateCcw } from 'lucide-react';
+import { Trash2, History, BarChart3, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { createPageUrl } from '@/utils';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
@@ -31,6 +33,7 @@ function getClassificationLabel(standardScore, zScore, tScore, percentile) {
 
 export default function SavedConversions({ subjectName, onSave, onReset, canSave }) {
     const queryClient = useQueryClient();
+    const navigate = useNavigate();
     const [showChart, setShowChart] = useState(false);
 
     const { data: allConversions = [], isLoading } = useQuery({
@@ -72,18 +75,18 @@ export default function SavedConversions({ subjectName, onSave, onReset, canSave
                         </p>
                     </div>
                 </div>
-                {subjectName && (
+                {subjectName && canSave && (
                     <div className="flex gap-2">
                         <Button
-                            onClick={() => {
-                                onSave();
+                            onClick={async () => {
+                                await onSave();
                                 onReset();
+                                navigate(createPageUrl('TestSubjects'));
                             }}
-                            disabled={!canSave}
                             className="bg-indigo-600 hover:bg-indigo-700"
                         >
                             <Save className="w-4 h-4 mr-2" />
-                            Save & Add Another
+                            Save & View Subject
                         </Button>
                     </div>
                 )}
