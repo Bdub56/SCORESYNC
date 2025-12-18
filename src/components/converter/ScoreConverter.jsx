@@ -8,6 +8,7 @@ import SavedConversions from './SavedConversions';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import jsPDF from 'jspdf';
+import { logActivity } from '../activityLogger';
 import { logActivity } from '../../utils/activityLogger';
 
 // Error function approximation for normal CDF

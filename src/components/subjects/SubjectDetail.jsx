@@ -14,6 +14,7 @@ import NormalCurveChart from '../converter/NormalCurveChart';
 import moment from 'moment';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import { logActivity } from '../activityLogger';
 import { logActivity } from '../../utils/activityLogger';
 
 function getClassificationLabel(standardScore, zScore, tScore, percentile) {

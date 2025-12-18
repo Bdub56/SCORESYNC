@@ -1,12 +1,18 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, BarChart3, BookOpen, Users } from 'lucide-react';
+import { Home, BarChart3, BookOpen, Users, Activity } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { createPageUrl } from '@/utils';
 import { cn } from '@/lib/utils';
+import { base44 } from '@/api/base44Client';
 
 export default function Navigation() {
     const location = useLocation();
+    const [user, setUser] = React.useState(null);
+
+    React.useEffect(() => {
+        base44.auth.me().then(u => setUser(u)).catch(() => {});
+    }, []);
     
     const navItems = [
         { name: 'Home', path: 'Home', icon: Home },
@@ -52,6 +58,20 @@ export default function Navigation() {
                                 </Link>
                             );
                         })}
+                        {user?.role === 'admin' && (
+                            <Link to={createPageUrl('ActivityLog')}>
+                                <Button
+                                    variant={isActive('ActivityLog') ? "default" : "ghost"}
+                                    className={cn(
+                                        "gap-2",
+                                        isActive('ActivityLog') && "bg-indigo-600 hover:bg-indigo-700"
+                                    )}
+                                >
+                                    <Activity className="w-4 h-4" />
+                                    <span className="hidden sm:inline">Activity Log</span>
+                                </Button>
+                            </Link>
+                        )}
                     </div>
                 </div>
             </div>

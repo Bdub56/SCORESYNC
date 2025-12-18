@@ -10,6 +10,7 @@ import SubjectDetail from '../components/subjects/SubjectDetail';
 import SubjectCreateForm from '../components/subjects/SubjectCreateForm';
 import Navigation from '../components/Navigation';
 import { toast } from 'sonner';
+import { logActivity } from '../components/activityLogger';
 import { logActivity } from '../utils/activityLogger';
 
 export default function TestSubjects() {
