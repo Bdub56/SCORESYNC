@@ -14,6 +14,7 @@ import NormalCurveChart from '../converter/NormalCurveChart';
 import moment from 'moment';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import { logActivity } from '../../utils/activityLogger';
 
 function getClassificationLabel(standardScore, zScore, tScore, percentile) {
     if (standardScore >= 130 || zScore >= 2.0 || tScore >= 70 || percentile >= 98) {
@@ -76,9 +77,16 @@ export default function SubjectDetail({ subject: initialSubject, onBack }) {
 
     const deleteMutation = useMutation({
         mutationFn: (id) => base44.entities.SavedConversion.delete(id),
-        onSuccess: () => {
+        onSuccess: (_, id) => {
             queryClient.invalidateQueries({ queryKey: ['savedConversions'] });
             toast.success('Test deleted');
+            const deletedTest = conversions.find(c => c.id === id);
+            if (deletedTest) {
+                logActivity('test_deleted', `Deleted test: ${deletedTest.scale_name} for ${subject.name}`, {
+                    scale: deletedTest.scale_name,
+                    subject: subject.name,
+                });
+            }
             // Go back if no conversions left
             if (conversions.length <= 1) {
                 onBack();
@@ -117,6 +125,10 @@ export default function SubjectDetail({ subject: initialSubject, onBack }) {
         toast.success('Subject information updated');
         setIsEditing(false);
         setEditedImageFile(null);
+        
+        logActivity('subject_updated', `Updated subject: ${editedName}`, {
+            subject: editedName,
+        });
         
         // Update local subject data
         subject.name = editedName;

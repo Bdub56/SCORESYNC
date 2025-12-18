@@ -8,6 +8,7 @@ import SavedConversions from './SavedConversions';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import jsPDF from 'jspdf';
+import { logActivity } from '../../utils/activityLogger';
 
 // Error function approximation for normal CDF
 function erf(x) {
@@ -149,9 +150,14 @@ export default function ScoreConverter() {
 
     const saveMutation = useMutation({
         mutationFn: (data) => base44.entities.SavedConversion.create(data),
-        onSuccess: () => {
+        onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: ['savedConversions'] });
             toast.success('Conversion saved successfully!');
+            logActivity('score_saved', `Saved ${data.scale_name} score for ${data.name || 'unnamed subject'}`, {
+                scale: data.scale_name,
+                score_type: data.score_type,
+                subject: data.name,
+            });
         },
     });
 

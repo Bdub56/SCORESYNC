@@ -10,6 +10,7 @@ import SubjectDetail from '../components/subjects/SubjectDetail';
 import SubjectCreateForm from '../components/subjects/SubjectCreateForm';
 import Navigation from '../components/Navigation';
 import { toast } from 'sonner';
+import { logActivity } from '../utils/activityLogger';
 
 export default function TestSubjects() {
     const [selectedSubject, setSelectedSubject] = useState(null);
@@ -72,6 +73,10 @@ export default function TestSubjects() {
 
             queryClient.invalidateQueries({ queryKey: ['savedConversions'] });
             toast.success('Subject created successfully!');
+            logActivity('subject_created', `Created new subject: ${data.name}`, {
+                subject: data.name,
+                age: `${data.ageYears}y ${data.ageMonths}m`,
+            });
             setShowCreateForm(false);
         } catch (error) {
             toast.error('Failed to create subject');
@@ -87,10 +92,15 @@ export default function TestSubjects() {
                 base44.entities.SavedConversion.delete(conversion.id)
             );
             await Promise.all(deletePromises);
+            return subject;
         },
-        onSuccess: () => {
+        onSuccess: (subject) => {
             queryClient.invalidateQueries({ queryKey: ['savedConversions'] });
             toast.success('Subject deleted successfully!');
+            logActivity('subject_deleted', `Deleted subject: ${subject.name}`, {
+                subject: subject.name,
+                tests_count: subject.conversions.length,
+            });
         },
         onError: () => {
             toast.error('Failed to delete subject');
