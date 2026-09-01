@@ -1,0 +1,79 @@
+{
+  "name": "SavedConversion",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Name of the individual"
+    },
+    "age_years": {
+      "type": "number",
+      "description": "Age in years"
+    },
+    "age_months": {
+      "type": "number",
+      "description": "Additional months for age"
+    },
+    "image_url": {
+      "type": "string",
+      "description": "URL of uploaded image"
+    },
+    "administrator_name": {
+      "type": "string",
+      "description": "Name of test administrator"
+    },
+    "administrator_email": {
+      "type": "string",
+      "description": "Email of test administrator"
+    },
+    "scale_name": {
+      "type": "string",
+      "description": "Name of the scale or test"
+    },
+    "score_type": {
+      "type": "string",
+      "description": "Type of input score"
+    },
+    "input_value": {
+      "type": "number",
+      "description": "Original input value"
+    },
+    "mean": {
+      "type": "number",
+      "description": "Population mean"
+    },
+    "standard_deviation": {
+      "type": "number",
+      "description": "Population standard deviation"
+    },
+    "z_score": {
+      "type": "number",
+      "description": "Converted Z-score"
+    },
+    "t_score": {
+      "type": "number",
+      "description": "Converted T-score"
+    },
+    "percentile": {
+      "type": "number",
+      "description": "Converted percentile rank"
+    },
+    "standard_score": {
+      "type": "number",
+      "description": "Converted standard score"
+    },
+    "scaled_score": {
+      "type": "number",
+      "description": "Converted scaled score"
+    },
+    "summary": {
+      "type": "string",
+      "description": "Score summary text"
+    }
+  },
+  "required": [
+    "scale_name",
+    "score_type",
+    "input_value"
+  ]
+}

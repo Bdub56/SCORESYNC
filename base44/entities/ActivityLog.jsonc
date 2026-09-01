@@ -1,0 +1,41 @@
+{
+  "name": "ActivityLog",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Email of the user who performed the action"
+    },
+    "user_name": {
+      "type": "string",
+      "description": "Name of the user who performed the action"
+    },
+    "action": {
+      "type": "string",
+      "description": "Type of action performed",
+      "enum": [
+        "score_converted",
+        "score_saved",
+        "subject_created",
+        "subject_updated",
+        "subject_deleted",
+        "test_deleted",
+        "report_generated",
+        "login",
+        "logout"
+      ]
+    },
+    "description": {
+      "type": "string",
+      "description": "Detailed description of the activity"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Additional data about the activity"
+    }
+  },
+  "required": [
+    "action",
+    "description"
+  ]
+}
